@@ -42,7 +42,8 @@ function showKmzViewer() {
     kmz.load("./data/VT_Hazens_Notch_20210414_TM.kmz");
     // show the coordinates when the mouse is clicked
     map.on("click", (e) => {
-        document.getElementById("coordinates").innerHTML = e.latlng.toString();
+        const { lat, lng } = e.latlng;
+        document.getElementById("coordinates").innerHTML = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
     });
     // make leaflet-control-layers collapsible using two tags: <detail> and <summary>
     const details = document.createElement("details");
