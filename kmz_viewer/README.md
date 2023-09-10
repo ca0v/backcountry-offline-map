@@ -40,4 +40,13 @@ To create a service worker, use the following link:
 https://serviceworke.rs/
 ```
 
+Maps can be found here:
 
+```
+https://ngmdb.usgs.gov/topoview/viewer/#11/45.0075/-72.5784
+```
+
+To make deploy.sh executable, use the following command:
+```
+chmod +x deploy.sh
+```
