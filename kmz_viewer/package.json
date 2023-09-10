@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "deploy": "npm run build",
+    "deploy": "npm-run-all build cp",
+    "cp": "cp index.* ./deploy/ && cp -r dist ./deploy",
     "build": "tsc",
     "watch": "tsc -w",
     "live": "npx live-server --port=8080 --entry-file=index.html",
