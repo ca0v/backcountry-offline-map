@@ -1,3 +1,6 @@
+Deployed to [netlify](https://main--timely-tiramisu-ce5f14.netlify.app/kmz_viewer/deploy/index.html)
+
+
 To disable showing js files in vscode explorer, modify the following in settings.json:
 ```
 "files.exclude": {

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "deploy": "deploy.sh",
+    "deploy": "npm run build",
     "build": "tsc",
     "watch": "tsc -w",
     "live": "npx live-server --port=8080 --entry-file=index.html",
