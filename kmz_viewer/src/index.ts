@@ -57,12 +57,12 @@ function showKmzViewer() {
   map.on("click", (e) => {
     const { lat, lng } = e.latlng
     const minutes = {
-      lat: Math.abs((lat % 1) * 60).toFixed(3),
-      lng: Math.abs((lng % 1) * 60).toFixed(3),
+      lat: Math.abs((lat % 1) * 60).toFixed(2),
+      lng: Math.abs((lng % 1) * 60).toFixed(2),
     }
     const degrees = {
-      lat: Math.floor(lat),
-      lng: Math.floor(lng),
+      lat: Math.floor(Math.abs(lat)),
+      lng: Math.floor(Math.abs(lng)),
     }
 
     const display = `${degrees.lat}°${minutes.lat}'N, ${degrees.lng}°${minutes.lng}'W`
