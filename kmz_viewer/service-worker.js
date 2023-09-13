@@ -1,9 +1,9 @@
 // use a cache-first strategy
 
 const CACHE_NAME = "kmz_viewer-cache-v1"
-const cache = await caches.open(CACHE_NAME)
 
 const cacheResponse = async (request) => {
+  const cache = await caches.open(CACHE_NAME)
   // is it already cached?
   const cachedResponse = await cache.match(request)
   if (cachedResponse) {
