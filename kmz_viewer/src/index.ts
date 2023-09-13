@@ -42,16 +42,16 @@ function showKmzViewer() {
     const layer = e.layer
     overlayGroup.addLayer(layer)
   })
-
-  ;["VT_Jay_Peak_OE_N_20210413_TM", "VT_North_Troy_OE_N_20210413_TM"].forEach(
-    (fileName) => {
-      kmz.load(`./data/${fileName}.kmz`)
-    }
-  )
-  kmz.load("./data/VT_Jay_Peak_20210414_TM.kmz")
-  kmz.load("./data/VT_North_Troy_20210414_TM.kmz")
-  kmz.load("./data/VT_Lowell_20210415_TM.kmz")
-  kmz.load("./data/VT_Hazens_Notch_20210414_TM.kmz")
+;[
+    "VT_Jay_Peak_OE_N_20210413_TM",
+    "VT_North_Troy_OE_N_20210413_TM",
+    "VT_Jay_Peak_20210414_TM",
+    "VT_North_Troy_20210414_TM",
+    "VT_Lowell_20210415_TM",
+    "VT_Hazens_Notch_20210414_TM",
+  ].forEach((fileName) => {
+    kmz.load(`./data/${fileName}.kmz`)
+  })
 
   // show the coordinates when the mouse is clicked
   map.on("click", (e) => {

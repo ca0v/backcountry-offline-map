@@ -1,27 +1,22 @@
 // use a cache-first strategy
 
-const CACHE_NAME = "kmz_viewer-cache-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/favicon.ico",
-  "/dist/index.js",
-  "/index.css",
-];
+const CACHE_NAME = "kmz_viewer-cache-v1"
 
-self.addEventListener("install", (event) => {
-  console.log("installing");
-});
+const cache = async (request) => {
+  const cache = await caches.open(CACHE_NAME)
+  // is it already cached?
+  const cachedResponse = await cache.match(request)
+  if (cachedResponse) {
+    console.log("found in cache", request.url)
+    return cachedResponse
+  }
+  const response = await fetch(request)
+  await cache.put(request, response.clone())
+  return response
+}
 
+// on fetch call cache
 self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Cache hit - return response
-      if (response) {
-        return response;
-      }
-      return fetch(event.request);
-    })
-  );
-});
+  console.log("fetch", event.request.url)
+  event.respondWith(cache(event.request))
+})
