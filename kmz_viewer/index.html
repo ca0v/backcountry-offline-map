@@ -64,8 +64,14 @@
     <title>Starski Map Viewer</title>
     <div id="map"></div>
     <div id="coordinates"></div>
+
     <script type="module">
       import { run } from "./dist/index.js";
+
+      if (typeof window.L === "undefined") {
+        throw `Leaflet is not defined`;
+      }
+
       run();
     </script>
   </body>
