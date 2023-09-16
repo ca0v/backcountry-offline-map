@@ -1,6 +1,6 @@
 export function run() {
     console.log("run");
-    showKmzViewer();
+    showKmlViewer();
     installServiceWorker();
 }
 function installServiceWorker() {
@@ -17,7 +17,7 @@ function installServiceWorker() {
         });
     }
 }
-function showKmzViewer() {
+function showKmlViewer() {
     const map = L.map("map");
     const topo = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
         maxZoom: 21,
@@ -26,24 +26,35 @@ function showKmzViewer() {
     });
     topo.addTo(map);
     const control = L.control.layers({}, {}, { collapsed: false }).addTo(map);
-    var kmz = L.kmzLayer().addTo(map);
     const overlayGroup = new L.LayerGroup();
     control.addOverlay(overlayGroup, "Overlay");
-    kmz.on("load", (e) => {
-        const layer = e.layer;
-        overlayGroup.addLayer(layer);
+    [
+        "VT_Jay_Peak_OE_N_20210413_TM",
+        "VT_North_Troy_OE_N_20210413_TM",
+        "VT_Jay_Peak_20210414_TM",
+        "VT_North_Troy_20210414_TM",
+        "VT_Lowell_20210415_TM",
+        "VT_Hazens_Notch_20210414_TM",
+    ].forEach((fileName) => {
+        const kmlFileName = `./data/${fileName}.kml`;
+        // create a kml layer
+        const kmlLayer = new L.KML(kmlFileName, { async: true });
+        // add the kml layer to the overlay group
+        overlayGroup.addLayer(kmlLayer);
     });
-    ["VT_Jay_Peak_OE_N_20210413_TM", "VT_North_Troy_OE_N_20210413_TM"].forEach((fileName) => {
-        kmz.load(`./data/${fileName}.kmz`);
-    });
-    kmz.load("./data/VT_Jay_Peak_20210414_TM.kmz");
-    kmz.load("./data/VT_North_Troy_20210414_TM.kmz");
-    kmz.load("./data/VT_Lowell_20210415_TM.kmz");
-    kmz.load("./data/VT_Hazens_Notch_20210414_TM.kmz");
     // show the coordinates when the mouse is clicked
     map.on("click", (e) => {
         const { lat, lng } = e.latlng;
-        document.getElementById("coordinates").innerHTML = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        const minutes = {
+            lat: Math.abs((lat % 1) * 60).toFixed(2),
+            lng: Math.abs((lng % 1) * 60).toFixed(2),
+        };
+        const degrees = {
+            lat: Math.floor(Math.abs(lat)),
+            lng: Math.floor(Math.abs(lng)),
+        };
+        const display = `${degrees.lat}°${minutes.lat}'N, ${degrees.lng}°${minutes.lng}'W`;
+        document.getElementById("coordinates").innerHTML = display;
     });
     // make leaflet-control-layers collapsible using two tags: <detail> and <summary>
     const details = document.createElement("details");

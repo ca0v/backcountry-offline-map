@@ -2,7 +2,7 @@
 <html lang="en">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="KMZ Viewer" />
+  <meta name="description" content="North East Kingdom Viewer" />
   <head>
     <style>
       @import url(./index.css);
@@ -40,7 +40,12 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script src="https://unpkg.com/leaflet-kmz@1.0.9/dist/leaflet-kmz.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.4.0/layer/vector/KML.min.js"
+      integrity="sha512-Lvgr0JRKIMOPpyrZxTpSTk23jmfkzHu9TQmsTS+o7XZnESnjuc62NWauzp/OmkaUjnqGkvFTWbDVs1swMrL6Ug=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw-src.css"
@@ -60,8 +65,8 @@
     <div id="map"></div>
     <div id="coordinates"></div>
     <script type="module">
-      import { run } from "./dist/index.js"
-      run()
+      import { run } from "./dist/index.js";
+      run();
     </script>
   </body>
 </html>
