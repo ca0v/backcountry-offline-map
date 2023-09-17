@@ -1,25 +1,81 @@
 import type * as LType from "leaflet";
 declare var L: typeof LType;
 
-export function run() {
-  console.log("run");
+export async function run() {
+  // this seems to be the best way to deal with versioning...
+  // it will force the app to re-install
+  if (window.location.search.includes("reinstall=1")) {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      registration.unregister();
+      console.log("service worker unregistered");
+    }
+  }
+
   showKmlViewer();
   installServiceWorker();
 }
 
-function installServiceWorker() {
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("./service-worker.js")
-        .then((registration) => {
-          console.log("SW registered: ", registration);
-        })
-        .catch((registrationError) => {
-          console.log("SW registration failed: ", registrationError);
-        });
+async function installServiceWorker() {
+  return new Promise<{ version: string }>((resolve, reject) => {
+    window.addEventListener("load", async () => {
+      try {
+        await navigator.serviceWorker.register("./service-worker.js");
+      } catch (registrationError) {
+        console.error("SW registration failed: ", registrationError);
+        reject(registrationError);
+      }
+
+      // create a two-way communication channel with the service worker
+      const onServiceWorkerMessage = (event: MessageEvent<any>) => {
+        console.log(
+          `Received message from service worker: ${JSON.stringify(event.data)}`
+        );
+        const { command, version } = event.data;
+
+        switch (command) {
+          case "pong": {
+            console.log("pong received from service worker");
+            break;
+          }
+          case "version_info":
+            document.title += ` ${version}`;
+            const currentVersion = localStorage.getItem("version") || version;
+            if (currentVersion !== version) {
+              // tell the service worker to clear the cache
+              navigator.serviceWorker.controller?.postMessage({
+                command: "clearCache",
+              });
+              localStorage.setItem("version", version);
+              console.log(`version updated to ${version}`);
+            }
+            break;
+        }
+      };
+
+      {
+        const channel1 = new MessageChannel();
+        channel1.port1.onmessage = onServiceWorkerMessage;
+        navigator.serviceWorker.controller?.postMessage(
+          {
+            command: "ping",
+          },
+          [channel1.port2]
+        );
+      }
+
+      {
+        const channel1 = new MessageChannel();
+        channel1.port1.onmessage = onServiceWorkerMessage;
+        navigator.serviceWorker.controller?.postMessage(
+          {
+            command: "getVersionInfo",
+          },
+          [channel1.port2]
+        );
+      }
     });
-  }
+  });
 }
 
 function showKmlViewer() {
