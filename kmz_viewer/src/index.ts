@@ -89,25 +89,27 @@ function showKmlViewer() {
   });
   topo.addTo(map);
 
-  const control = L.control.layers({}, {}, { collapsed: false }).addTo(map);
+  if (0) {
+    const control = L.control.layers({}, {}, { collapsed: false }).addTo(map);
 
-  const overlayGroup = new L.LayerGroup();
-  control.addOverlay(overlayGroup, "Overlay");
+    const overlayGroup = new L.LayerGroup();
+    control.addOverlay(overlayGroup, "Overlay");
 
-  [
-    "VT_Jay_Peak_OE_N_20210413_TM",
-    "VT_North_Troy_OE_N_20210413_TM",
-    "VT_Jay_Peak_20210414_TM",
-    "VT_North_Troy_20210414_TM",
-    "VT_Lowell_20210415_TM",
-    "VT_Hazens_Notch_20210414_TM",
-  ].forEach((fileName) => {
-    const kmlFileName = `./data/${fileName}.kml`;
-    // create a kml layer
-    const kmlLayer = new (<any>L).KML(kmlFileName, { async: true });
-    // add the kml layer to the overlay group
-    overlayGroup.addLayer(kmlLayer);
-  });
+    [
+      "VT_Jay_Peak_OE_N_20210413_TM",
+      "VT_North_Troy_OE_N_20210413_TM",
+      "VT_Jay_Peak_20210414_TM",
+      "VT_North_Troy_20210414_TM",
+      "VT_Lowell_20210415_TM",
+      "VT_Hazens_Notch_20210414_TM",
+    ].forEach((fileName) => {
+      const kmlFileName = `./data/${fileName}.kml`;
+      // create a kml layer
+      const kmlLayer = new (<any>L).KML(kmlFileName, { async: true });
+      // add the kml layer to the overlay group
+      overlayGroup.addLayer(kmlLayer);
+    });
+  }
 
   // show the coordinates when the mouse is clicked
   map.on("click", (e) => {
@@ -124,15 +126,6 @@ function showKmlViewer() {
     const display = `${degrees.lat}°${minutes.lat}'N, ${degrees.lng}°${minutes.lng}'W`;
     document.getElementById("coordinates")!.innerHTML = display;
   });
-
-  // make leaflet-control-layers collapsible using two tags: <detail> and <summary>
-  const details = document.createElement("details");
-  details.innerHTML = `<summary>Layers</summary>`;
-  const child = document.querySelector(".leaflet-control-layers")!;
-  details.className = child.className;
-  child.className = "";
-  child.parentElement!.replaceChild(details, child);
-  details.appendChild(child);
 
   // allow user to draw lines on the map
   const drawnItems = new L.FeatureGroup();
