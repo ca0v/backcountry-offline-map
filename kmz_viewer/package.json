@@ -1,7 +1,7 @@
 {
   "scripts": {
     "deploy": "npm-run-all deploy:rm build deploy:cp",
-    "deploy:rm": "rm -rf deploy & mkdir deploy",
+    "deploy:rm": "rm -rf deploy;mkdir deploy",
     "deploy:cp": "cp index.html ./deploy/ && cp index.css ./deploy/ && cp service-worker.js ./deploy/ && cp -r dist ./deploy && cp -r data/ ./deploy/data/",
     "build": "tsc",
     "watch": "tsc -w",
