@@ -130,6 +130,20 @@ class AppController {
     }
 
     // show the coordinates when the mouse is clicked
+    const locationElement = document.querySelector<HTMLElement>("#coordinates");
+    if (!locationElement) {
+      throw new Error("location element not found");
+    }
+
+    // copy location to clipboard when clicked
+    locationElement.onclick = () => {
+      const text = locationElement.innerHTML;
+      navigator.clipboard.writeText(text);
+      // show a toast message
+      const message = "Copied to clipboard";
+      toast(message);
+    };
+
     map.on("click", (e) => {
       const { lat, lng } = e.latlng;
       const minutes = {
@@ -142,7 +156,7 @@ class AppController {
       };
 
       const display = `${degrees.lat}°${minutes.lat}'N, ${degrees.lng}°${minutes.lng}'W`;
-      document.getElementById("coordinates")!.innerHTML = display;
+      locationElement.innerHTML = display;
     });
 
     // allow user to draw lines on the map
@@ -263,6 +277,23 @@ class AppController {
       true
     );
   }
+}
+
+function toast(message: string) {
+  const toast = document.createElement("div");
+  toast.innerHTML = message;
+  toast.style.position = "absolute";
+  toast.style.top = "10px";
+  toast.style.right = "10px";
+  toast.style.padding = "10px";
+  toast.style.backgroundColor = "white";
+  toast.style.border = "1px solid black";
+  toast.style.borderRadius = "5px";
+  toast.style.zIndex = "1000";
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    document.body.removeChild(toast);
+  }, 1000);
 }
 
 export async function run() {
