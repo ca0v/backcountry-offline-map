@@ -98,7 +98,7 @@ class AppController {
     const topo = L.tileLayer(
       "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
       {
-        maxZoom: 18,
+        maxZoom: 15,
         opacity: 1,
       }
     );
@@ -195,9 +195,30 @@ class AppController {
 
     // add a button to go to current location
     const locationButton = document.createElement("button");
-    locationButton.innerHTML = "Go to current location";
-    locationButton.onclick = () => {
-      map.locate({ setView: true, maxZoom: 12 });
+    locationButton.innerHTML = "&#x1F4CD;";
+    locationButton.onclick = async () => {
+      // get the current location using web api
+      const currentLocation = await new Promise<{ lat: number; lng: number }>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              resolve({ lat: latitude, lng: longitude });
+            },
+            (error) => {
+              reject(error);
+            }
+          );
+        }
+      );
+      map.setView(currentLocation, 16);
+      // place a circle the current location
+      L.marker(currentLocation, {
+        icon: L.divIcon({
+          className: "current_location",
+          html: "&#x1F4CD;",
+        }),
+      }).addTo(map);
     };
 
     // add the button to the bottom-right of the map
