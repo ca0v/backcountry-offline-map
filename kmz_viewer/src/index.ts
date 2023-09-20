@@ -229,6 +229,10 @@ class AppController {
           if (beta < 45) {
             orientation.style.visibility = "visible";
             orientation.style.setProperty("--orientation", `${alpha}deg`);
+            orientation.classList.toggle(
+              "not-north",
+              alpha < -15 || alpha > 15
+            );
           }
         }
       },

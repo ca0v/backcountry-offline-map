@@ -40,10 +40,15 @@ body,
   align-items: center;
   font-size: 2rem;
   font-weight: bold;
-  visibility: hidden;
+  visibility: visible;
   outline: 3px solid #3333;
 }
 
 #north_arrow::before {
-  content: "⇩"; /* ⇩⇧ 0 => south, 180 => north */
+  content: "⇧"; /* ⇩⇧ 0 => south, 180 => north */
+  color: #0f0;
+}
+
+#north_arrow.not-north::before {
+  color: #f00;
 }
