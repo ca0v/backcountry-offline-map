@@ -6,6 +6,18 @@ const OLD_CACHE_NAMES = [
   "kmz_viewer-cache-v0",
 ];
 
+async function removeFromCache(extensions = [".png", ".jpg"]) {
+  const cache = await caches.open(CACHE_NAME);
+  cache.keys().then((keys) => {
+    keys.forEach((request) => {
+      if (extensions.some((v) => request.url.endsWith(v))) {
+        cache.delete(request);
+        console.log(`deleted ${request.url}`);
+      }
+    });
+  });
+}
+
 // delete old caches
 self.addEventListener("activate", async (event) => {
   event.waitUntil(
@@ -13,6 +25,7 @@ self.addEventListener("activate", async (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (OLD_CACHE_NAMES.includes(cacheName)) {
+            console.log(`deleting ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -28,6 +41,14 @@ self.addEventListener("message", async (event) => {
     case "ping":
       console.log("ping");
       port?.postMessage({ version: APP_VERSION, command: "pong" });
+      break;
+    case "clearCacheTiles":
+      removeFromCache([".png", ".jpg"]);
+      port?.postMessage({ version: APP_VERSION, command: "cache_cleared" });
+      break;
+    case "clearCacheCode":
+      removeFromCache([".js", ".css", ".html"]);
+      port?.postMessage({ version: APP_VERSION, command: "cache_cleared" });
       break;
     case "clearCache":
       caches.delete(CACHE_NAME);
@@ -61,7 +82,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(strategies.cacheFirst(event.request));
 });
 
-// send a message to the client
+// receive a message from the client
 self.addEventListener("message", (event) => {
   console.log("message", JSON.stringify(event));
 });

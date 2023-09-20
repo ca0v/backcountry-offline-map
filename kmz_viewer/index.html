@@ -7,26 +7,7 @@
     <style>
       @import url(./index.css);
     </style>
-    <style>
-      html,
-      body,
-      #map {
-        height: 100%;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-      }
-      #coordinates {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        padding: 10px;
-        background-color: rgba(255, 255, 255, 0.5);
-        font-family: monospace;
-        font-size: 12px;
-        z-index: 1000;
-      }
-    </style>
+    <style></style>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
@@ -64,6 +45,7 @@
     <title>Starski Map Viewer</title>
     <div id="map"></div>
     <div id="coordinates"></div>
+    <div id="north_arrow"></div>
 
     <script type="module">
       import { run } from "./dist/index.js";
