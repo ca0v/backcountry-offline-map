@@ -24,7 +24,7 @@ body,
 
 #north_arrow {
   --size: 1.5rem;
-  --orientation: 30deg;
+  --orientation: 0deg;
   rotate: var(--orientation);
   position: absolute;
   top: 1rem;
@@ -45,5 +45,5 @@ body,
 }
 
 #north_arrow::before {
-  content: "⇧";
+  content: "⇩"; /* ⇩⇧ 0 => south, 180 => north */
 }

@@ -217,19 +217,23 @@ class AppController {
   listenForChangesToDeviceOrientation() {
     // listen for a DeviceMotionEvent
     const orientation = document.getElementById("north_arrow")!;
-    window.addEventListener("deviceorientation", (event) => {
-      // set the --orientation css variable
-      const { alpha, beta, gamma } = event;
-      if (typeof alpha === "number" && typeof beta === "number") {
-        if (beta > 45) {
-          orientation.style.visibility = "hidden";
+    window.addEventListener(
+      "deviceorientationabsolute",
+      (event) => {
+        // set the --orientation css variable
+        const { alpha, beta, gamma } = event as any;
+        if (typeof alpha === "number" && typeof beta === "number") {
+          if (beta > 45) {
+            orientation.style.visibility = "hidden";
+          }
+          if (beta < 45) {
+            orientation.style.visibility = "visible";
+            orientation.style.setProperty("--orientation", `${alpha}deg`);
+          }
         }
-        if (beta < 45) {
-          orientation.style.visibility = "visible";
-          orientation.style.setProperty("--orientation", `${alpha}deg`);
-        }
-      }
-    });
+      },
+      true
+    );
   }
 }
 
