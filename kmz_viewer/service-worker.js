@@ -6,16 +6,14 @@ const OLD_CACHE_NAMES = [
   "kmz_viewer-cache-v0",
 ];
 
-async function removeFromCache(extensions = [".png", ".jpg"]) {
-  const cache = await caches.open(CACHE_NAME);
-  cache.keys().then((keys) => {
-    keys.forEach((request) => {
-      if (extensions.some((v) => request.url.endsWith(v))) {
-        cache.delete(request);
-        console.log(`deleted ${request.url}`);
-      }
-    });
-  });
+
+function clearCurrentCache() {
+  caches.delete(CACHE_NAME);
+}
+
+function clearTiles() {
+  // url:"https://a.tile.opentopomap.org/11/608/736.png"
+  // get the current cache
 }
 
 // delete old caches
@@ -25,7 +23,6 @@ self.addEventListener("activate", async (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (OLD_CACHE_NAMES.includes(cacheName)) {
-            console.log(`deleting ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -42,16 +39,8 @@ self.addEventListener("message", async (event) => {
       console.log("ping");
       port?.postMessage({ version: APP_VERSION, command: "pong" });
       break;
-    case "clearCacheTiles":
-      removeFromCache([".png", ".jpg"]);
-      port?.postMessage({ version: APP_VERSION, command: "cache_cleared" });
-      break;
-    case "clearCacheCode":
-      removeFromCache([".js", ".css", ".html"]);
-      port?.postMessage({ version: APP_VERSION, command: "cache_cleared" });
-      break;
     case "clearCache":
-      caches.delete(CACHE_NAME);
+      clearCurrentCache();
       port?.postMessage({ version: APP_VERSION, command: "cache_cleared" });
       break;
     case "getVersionInfo":
@@ -82,7 +71,8 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(strategies.cacheFirst(event.request));
 });
 
-// receive a message from the client
+// send a message to the client
 self.addEventListener("message", (event) => {
   console.log("message", JSON.stringify(event));
 });
+
