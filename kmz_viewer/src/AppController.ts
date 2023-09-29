@@ -182,7 +182,7 @@ export class AppController {
         const locationButton = document.createElement("button");
         locationButton.innerHTML = "&#x1F4CD;";
         locationButton.onclick = async () => {
-            new Breadcrumbs(map, { minDistance: 10 });
+            new Breadcrumbs(map, { minDistance: 1 });
             // get the current location using web api
             const currentLocation = await new Promise<{ lat: number; lng: number; }>(
                 (resolve, reject) => {

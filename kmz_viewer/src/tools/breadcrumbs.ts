@@ -1,4 +1,5 @@
 import type * as LType from "leaflet";
+import { toast } from "../toast.js";
 declare var L: typeof LType;
 
 export { Breadcrumbs };
@@ -80,7 +81,7 @@ class Breadcrumbs {
                 // set the current location as the prior location
                 this.state.priorLocation = currentLocation;
             } else {
-                console.log(`distance ${distance} is less than ${this.options.minDistance}`)
+                toast(`distance ${distance} is less than ${this.options.minDistance}`)
             }
         }
     }
