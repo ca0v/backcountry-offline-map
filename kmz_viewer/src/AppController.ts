@@ -182,13 +182,13 @@ export class AppController {
         }
 
         new NavigateToPoint(map, {});
+        new Breadcrumbs(map, { minDistance: 10 });
 
         // add a button to go to current location
         {
             const locationButton = document.createElement("button");
             locationButton.innerHTML = "&#x1F4CD;";
             locationButton.onclick = async () => {
-                new Breadcrumbs(map, { minDistance: 10 });
                 // get the current location using web api
                 let marker: L.Marker;
                 onLocation(currentLocation => {

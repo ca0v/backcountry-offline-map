@@ -1,5 +1,5 @@
 import type * as LType from "leaflet";
-import { toast } from "../toast.js";
+import { html } from "./html.js";
 import { onLocation } from "./getCurrentLocation.js";
 declare var L: typeof LType;
 
@@ -12,11 +12,14 @@ const default_options = {
 type Options = typeof default_options;
 
 class Breadcrumbs {
-    readonly map: L.Map;
-    options: Options;
+    private readonly map: L.Map;
+    private options: Options;
+    private launchButton: HTMLElement;
+    private markers = [] as Array<L.Marker>;
+    private active = false;
+    private off = [] as Array<() => void>;
 
     state = {
-        isPaused: false,
         priorLocation: null as { lat: number; lng: number; } | null,
         breadCrumbs: [] as Array<{ lat: number; lng: number; }>
     }
@@ -24,11 +27,18 @@ class Breadcrumbs {
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
-        this.restoreState();
-        if (!this.state.isPaused) {
-            this.state.isPaused = true; // prevent start from aborting
-            this.start();
-        }
+        this.launchButton = html`<button class="breadcrumb-tool" title="Breadcrumbs">B</button>`;
+        // add the button to the map
+        document.body.appendChild(this.launchButton);
+        this.launchButton.addEventListener("click", () => {
+            if (!this.active) {
+                this.active = true;
+                this.start();
+            } else {
+                this.active = false;
+                this.stop();
+            }
+        });
     }
 
     restoreState() {
@@ -46,22 +56,8 @@ class Breadcrumbs {
     }
 
     async start() {
-        if (!this.state.isPaused) return;
-        this.state.isPaused = false;
-        const doit = async () => {
-            if (this.state.isPaused) return;
-            await this.poll()
-            setTimeout(async () => {
-                await doit();
-            }, 1000 * 5);
-        }
-        doit();
-    }
-
-
-    async poll() {
-        // get the current location
-        onLocation(currentLocation => {
+        this.restoreState();
+        let { off } = onLocation(currentLocation => {
             if (!this.state.priorLocation) {
                 this.state.priorLocation = currentLocation;
                 this.state.breadCrumbs.push(currentLocation);
@@ -84,15 +80,28 @@ class Breadcrumbs {
                 }
             }
         });
+        this.off.push(off);
+    }
+
+    stop() {
+        this.markers.forEach(marker => marker.remove());
+        this.markers = [];
+        this.state = {
+            priorLocation: null,
+            breadCrumbs: []
+        }
+        this.off.forEach(off => off());
+        this.off = [];
     }
 
     drawBreadcrumb(currentLocation: { lat: number; lng: number; }) {
-        L.marker(currentLocation, {
+        const marker = L.marker(currentLocation, {
             icon: L.divIcon({
                 className: "current_location",
                 html: "X",
             }),
         }).addTo(this.map);
+        this.markers.push(marker);
     }
 }
 

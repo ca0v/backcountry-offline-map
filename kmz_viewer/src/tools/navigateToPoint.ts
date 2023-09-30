@@ -2,6 +2,7 @@ import type * as LType from "leaflet";
 import { toast } from "../toast.js";
 import { onLocation } from "./getCurrentLocation.js";
 import { onOrientation } from "./orientation.js";
+import { html } from "./html.js";
 declare var L: typeof LType;
 
 const default_options = {
@@ -23,7 +24,7 @@ export class NavigateToPoint {
         this.map = map;
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
         this.compass = html`<div class="navigator-compass">⇧</div>`
-        this.launchButton = html`<button class="navigate-to-point">Navigate to point</button>`;
+        this.launchButton = html`<button class="navigate-to-point" title="Navigate to point">N</button>`;
         // add the button to the map
         document.body.appendChild(this.launchButton);
         // when user clicks the button, listen for a map click and start navigating to that point
@@ -51,7 +52,7 @@ export class NavigateToPoint {
                 this.off.push(() => {
                     marker.remove();
                     this.compass.remove();
-                    this.launchButton.textContent = "Navigate to point";
+                    this.launchButton.textContent = "N";
                 })
             });
         });
@@ -77,13 +78,6 @@ export class NavigateToPoint {
         }));
         this.off.push(off);
     }
-}
-
-function html(strings: TemplateStringsArray, ...values: any[]) {
-    const template = document.createElement("template");
-    template.innerHTML = strings.join("");
-    // 34°50.29'N, 82°14.48'W
-    return template.content.firstElementChild as HTMLElement;
 }
 
 function asDistance(distanceInMeters: number) {

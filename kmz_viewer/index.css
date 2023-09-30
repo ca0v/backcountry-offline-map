@@ -53,11 +53,22 @@ body,
   color: #f00;
 }
 
+.breadcrumb-tool {
+  position: absolute;
+  z-index: 1000;
+  bottom: 1rem;
+  left: 1rem;
+  width: 2rem;
+  height: 2rem;
+}
+
 .navigate-to-point {
   position: absolute;
   z-index: 1000;
-  top: 1rem;
+  bottom: 1rem;
   left: 3rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .navigator-compass {
