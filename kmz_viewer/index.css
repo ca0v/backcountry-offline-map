@@ -52,3 +52,32 @@ body,
 #north_arrow.not-north::before {
   color: #f00;
 }
+
+.navigate-to-point {
+  position: absolute;
+  z-index: 1000;
+  top: 1rem;
+  left: 3rem;
+}
+
+.navigator-compass {
+  --size: 1.5rem;
+  --orientation: 0deg;
+  position: absolute;
+  z-index: 1000;
+  top: 3rem;
+  right: 1rem;
+  rotate: var(--orientation);
+  color: #333;
+  background-color: #cccc;
+  border-radius: var(--size);
+  width: var(--size);
+  height: var(--size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  visibility: visible;
+  outline: 3px solid #3333;
+}

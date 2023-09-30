@@ -4,6 +4,8 @@ declare var L: typeof LType;
 import { readQueryFlags } from "./readQueryFlags.js";
 import { toast } from "./toast.js";
 import { Breadcrumbs } from "./tools/breadcrumbs.js";
+import { onOrientation } from "./tools/orientation.js";
+import { NavigateToPoint } from "./tools/navigateToPoint.js"
 
 export class AppController {
     // create a two-way communication channel with the service worker
@@ -178,6 +180,8 @@ export class AppController {
             map.setView([44.875, -72.5], 13);
         }
 
+        new NavigateToPoint(map, {});
+
         // add a button to go to current location
         const locationButton = document.createElement("button");
         locationButton.innerHTML = "&#x1F4CD;";
@@ -223,27 +227,22 @@ export class AppController {
 
     listenForChangesToDeviceOrientation() {
         // listen for a DeviceMotionEvent
-        const orientation = document.getElementById("north_arrow")!;
-        window.addEventListener(
-            "deviceorientationabsolute",
-            (event) => {
-                // set the --orientation css variable
-                const { alpha, beta, gamma } = event as any;
-                if (typeof alpha === "number" && typeof beta === "number") {
-                    if (beta > 45) {
-                        orientation.style.visibility = "hidden";
-                    }
-                    if (beta < 45) {
-                        orientation.style.visibility = "visible";
-                        orientation.style.setProperty("--orientation", `${alpha}deg`);
-                        orientation.classList.toggle(
-                            "not-north",
-                            alpha < -15 || alpha > 15
-                        );
-                    }
+        const orientationArrow = document.getElementById("north_arrow")!;
+        onOrientation(orientation => {
+            const { alpha, beta, gamma } = orientation;
+            if (typeof alpha === "number" && typeof beta === "number") {
+                if (beta > 45) {
+                    orientationArrow.style.visibility = "hidden";
                 }
-            },
-            true
-        );
+                if (beta < 45) {
+                    orientationArrow.style.visibility = "visible";
+                    orientationArrow.style.setProperty("--orientation", `${alpha}deg`);
+                    orientationArrow.classList.toggle(
+                        "not-north",
+                        alpha < -15 || alpha > 15
+                    );
+                }
+            }
+        });
     }
 }

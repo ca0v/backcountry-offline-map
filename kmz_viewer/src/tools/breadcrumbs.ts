@@ -1,5 +1,6 @@
 import type * as LType from "leaflet";
 import { toast } from "../toast.js";
+import { getCurrentLocation } from "./getCurrentLocation.js";
 declare var L: typeof LType;
 
 export { Breadcrumbs };
@@ -96,18 +97,3 @@ class Breadcrumbs {
     }
 }
 
-async function getCurrentLocation() {
-    return await new Promise<{ lat: number; lng: number; }>(
-        (resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    resolve({ lat: latitude, lng: longitude });
-                },
-                (error) => {
-                    reject(error);
-                }
-            );
-        }
-    );
-}
