@@ -7,6 +7,7 @@ import { Breadcrumbs } from "./tools/breadcrumbs.js";
 import { onOrientation } from "./tools/orientation.js";
 import { NavigateToPoint } from "./tools/navigateToPoint.js"
 import { ShowCurrentLocation } from "./tools/showCurrentLocation.js";
+import { ShowCoordinatesTool } from "./tools/ShowCoordinates.js";
 
 export class AppController {
     // create a two-way communication channel with the service worker
@@ -100,35 +101,7 @@ export class AppController {
         );
         topo.addTo(map);
 
-        // show the coordinates when the mouse is clicked
-        const locationElement = document.querySelector<HTMLElement>("#coordinates");
-        if (!locationElement) {
-            throw new Error("location element not found");
-        }
 
-        // copy location to clipboard when clicked
-        locationElement.onclick = () => {
-            const text = locationElement.innerHTML;
-            navigator.clipboard.writeText(text);
-            // show a toast message
-            const message = "Copied to clipboard";
-            toast(message);
-        };
-
-        map.on("click", (e) => {
-            const { lat, lng } = e.latlng;
-            const minutes = {
-                lat: Math.abs((lat % 1) * 60).toFixed(2),
-                lng: Math.abs((lng % 1) * 60).toFixed(2),
-            };
-            const degrees = {
-                lat: Math.floor(Math.abs(lat)),
-                lng: Math.floor(Math.abs(lng)),
-            };
-
-            const display = `${degrees.lat}°${minutes.lat}'N, ${degrees.lng}°${minutes.lng}'W`;
-            locationElement.innerHTML = display;
-        });
 
         // allow user to draw lines on the map
         const drawnItems = new L.FeatureGroup();
@@ -184,6 +157,7 @@ export class AppController {
         new ShowCurrentLocation(map, {});
         new NavigateToPoint(map, {});
         new Breadcrumbs(map, { minDistance: 10 });
+        new ShowCoordinatesTool(map, {});
 
         // add a button to go to current location
         if (document.querySelector(".north_arrow")) {
