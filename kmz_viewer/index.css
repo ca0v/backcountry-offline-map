@@ -71,6 +71,15 @@ body,
   height: 2rem;
 }
 
+.current-location-tool {
+  position: absolute;
+  z-index: 1000;
+  bottom: 1rem;
+  left: 5rem;
+  width: 2rem;
+  height: 2rem;
+}
+
 .navigator-compass {
   --size: 1.5rem;
   --orientation: 0deg;
