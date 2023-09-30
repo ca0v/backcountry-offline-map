@@ -1,6 +1,6 @@
 import type * as LType from "leaflet";
 import { toast } from "../toast.js";
-import { getCurrentLocation } from "./getCurrentLocation.js";
+import { onLocation } from "./getCurrentLocation.js";
 declare var L: typeof LType;
 
 export { Breadcrumbs };
@@ -61,30 +61,29 @@ class Breadcrumbs {
 
     async poll() {
         // get the current location
-        const currentLocation = await getCurrentLocation();
-        if (!this.state.priorLocation) {
-            this.state.priorLocation = currentLocation;
-            this.state.breadCrumbs.push(currentLocation);
-            this.saveState();
-            this.drawBreadcrumb(currentLocation);
-        } else {
-            // calculate the distance between the current location and the prior location
-            const distance = this.map.distance(
-                [currentLocation.lat, currentLocation.lng],
-                [this.state.priorLocation.lat, this.state.priorLocation.lng]
-            );
-            // if the distance is greater than the minimum distance
-            if (distance > this.options.minDistance) {
-                // add the current location to the breadcrumbs
+        onLocation(currentLocation => {
+            if (!this.state.priorLocation) {
+                this.state.priorLocation = currentLocation;
                 this.state.breadCrumbs.push(currentLocation);
                 this.saveState();
                 this.drawBreadcrumb(currentLocation);
-                // set the current location as the prior location
-                this.state.priorLocation = currentLocation;
             } else {
-                toast(`distance ${distance} is less than ${this.options.minDistance}`)
+                // calculate the distance between the current location and the prior location
+                const distance = this.map.distance(
+                    [currentLocation.lat, currentLocation.lng],
+                    [this.state.priorLocation.lat, this.state.priorLocation.lng]
+                );
+                // if the distance is greater than the minimum distance
+                if (distance > this.options.minDistance) {
+                    // add the current location to the breadcrumbs
+                    this.state.breadCrumbs.push(currentLocation);
+                    this.saveState();
+                    this.drawBreadcrumb(currentLocation);
+                    // set the current location as the prior location
+                    this.state.priorLocation = currentLocation;
+                }
             }
-        }
+        });
     }
 
     drawBreadcrumb(currentLocation: { lat: number; lng: number; }) {

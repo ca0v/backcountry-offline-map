@@ -6,6 +6,7 @@ import { toast } from "./toast.js";
 import { Breadcrumbs } from "./tools/breadcrumbs.js";
 import { onOrientation } from "./tools/orientation.js";
 import { NavigateToPoint } from "./tools/navigateToPoint.js"
+import { onLocation } from "./tools/getCurrentLocation.js";
 
 export class AppController {
     // create a two-way communication channel with the service worker
@@ -183,40 +184,35 @@ export class AppController {
         new NavigateToPoint(map, {});
 
         // add a button to go to current location
-        const locationButton = document.createElement("button");
-        locationButton.innerHTML = "&#x1F4CD;";
-        locationButton.onclick = async () => {
-            new Breadcrumbs(map, { minDistance: 1 });
-            // get the current location using web api
-            const currentLocation = await new Promise<{ lat: number; lng: number; }>(
-                (resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const { latitude, longitude } = position.coords;
-                            resolve({ lat: latitude, lng: longitude });
-                        },
-                        (error) => {
-                            reject(error);
-                        }
-                    );
-                }
-            );
-            map.setView(currentLocation, 16);
-            // place a circle the current location
-            L.marker(currentLocation, {
-                icon: L.divIcon({
-                    className: "current_location",
-                    html: "&#x1F4CD;",
-                }),
-            }).addTo(map);
-        };
+        {
+            const locationButton = document.createElement("button");
+            locationButton.innerHTML = "&#x1F4CD;";
+            locationButton.onclick = async () => {
+                new Breadcrumbs(map, { minDistance: 10 });
+                // get the current location using web api
+                let marker: L.Marker;
+                onLocation(currentLocation => {
+                    if (!marker) {
+                        map.setView(currentLocation, 16);
+                        marker = L.marker(currentLocation, {
+                            icon: L.divIcon({
+                                className: "current_location",
+                                html: "&#x1F4CD;",
+                            }),
+                        }).addTo(map);
+                    } else {
+                        marker.setLatLng(currentLocation);
+                    }
+                });
+            };
 
-        // add the button to the bottom-right of the map
-        locationButton.style.position = "absolute";
-        locationButton.style.bottom = "30px";
-        locationButton.style.right = "10px";
-        locationButton.style.zIndex = "1000";
-        map.getContainer().appendChild(locationButton);
+            // add the button to the bottom-right of the map
+            locationButton.style.position = "absolute";
+            locationButton.style.bottom = "30px";
+            locationButton.style.right = "10px";
+            locationButton.style.zIndex = "1000";
+            map.getContainer().appendChild(locationButton);
+        }
 
         if (document.querySelector(".north_arrow")) {
             const northArrow = document.querySelector(".north_arrow")!;

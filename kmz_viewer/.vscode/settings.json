@@ -3,5 +3,9 @@
     "*dist/**": true,
     "*node_modules/**": true,
     "**/*.js": { "when": "$(basename).ts" }
+  },
+  // do not search .js files
+  "search.exclude": {
+    "**/*.js": true
   }
 }

@@ -15,4 +15,9 @@ export function getOrientation() {
 export function onOrientation(cb: (event: Orientation) => void) {
     listeners.push(cb);
     cb(orientation)
+    return {
+        off: () => {
+            listeners.splice(listeners.indexOf(cb), 1);
+        }
+    }
 }
