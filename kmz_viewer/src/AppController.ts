@@ -8,8 +8,31 @@ import { onOrientation } from "./tools/orientation.js";
 import { NavigateToPoint } from "./tools/navigateToPoint.js"
 import { ShowCurrentLocation } from "./tools/showCurrentLocation.js";
 import { ShowCoordinatesTool } from "./tools/ShowCoordinates.js";
+import type { Location } from "./tools/getCurrentLocation.js";
+import { EventManager } from "./tools/EventManager.js";
+
+const default_options = {
+    state: {
+        priorLocation: null as Location | null,
+        breadCrumbs: [] as Array<Location>,
+        navigatingTo: null as Location | null,
+    }
+}
+
+type Options = typeof default_options;
 
 export class AppController {
+    private options: Options;
+    private state: Options["state"];
+
+    constructor(options: Partial<Options>) {
+        this.options = Object.freeze(Object.assign({ ...default_options }, options));
+        this.state = this.options.state;
+        if (!this.state) {
+            this.loadState();
+        }
+    }
+
     // create a two-way communication channel with the service worker
     onServiceWorkerMessage(event: MessageEvent<any>) {
         console.log(
@@ -154,9 +177,46 @@ export class AppController {
             map.setView([44.875, -72.5], 13);
         }
 
-        new ShowCurrentLocation(map, {});
-        new NavigateToPoint(map, {});
-        new Breadcrumbs(map, { minDistance: 10 });
+        const currentLocationTool = new ShowCurrentLocation(map, {
+            location: this.state.priorLocation
+        });
+        currentLocationTool.on("change", (e) => {
+            this.state.priorLocation = e.location;
+            this.saveState();
+        })
+
+        currentLocationTool.on("clear", (e) => {
+            this.state.priorLocation = null;
+            this.saveState();
+        });
+
+        const navigateToPointTool = new NavigateToPoint(map,
+            {
+                location: this.state.navigatingTo
+            });
+
+        navigateToPointTool.on("change", (e) => {
+            this.state.navigatingTo = e.location;
+            this.saveState();
+        })
+
+        navigateToPointTool.on("clear", (e) => {
+            this.state.navigatingTo = null;
+            this.saveState();
+        })
+
+        const breadcrumbTool = new Breadcrumbs(map, {
+            minDistance: 10, state: {
+                priorLocation: this.state.priorLocation,
+                breadCrumbs: this.state.breadCrumbs
+            }
+        });
+
+        breadcrumbTool.on("change", (e) => {
+            this.state.breadCrumbs.push(e.location);
+            this.saveState();
+        })
+
         new ShowCoordinatesTool(map, {});
 
         // add a button to go to current location
@@ -186,5 +246,19 @@ export class AppController {
                 }
             }
         });
+    }
+
+    saveState() {
+        const data = JSON.stringify(this.state);
+        localStorage.setItem("state", data);
+        console.log(`state saved: ${data}`)
+    }
+
+    loadState() {
+        const state = localStorage.getItem("state");
+        if (state) {
+            console.log(`state loaded: ${state}`)
+            this.state = JSON.parse(state);
+        }
     }
 }

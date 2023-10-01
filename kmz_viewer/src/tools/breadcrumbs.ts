@@ -1,12 +1,18 @@
 import type * as LType from "leaflet";
 import { html } from "./html.js";
 import { onLocation } from "./getCurrentLocation.js";
+import type { Location } from "./getCurrentLocation.js";
+import { EventManager } from "./EventManager.js";
 declare var L: typeof LType;
 
 export { Breadcrumbs };
 
 const default_options = {
-    minDistance: 10
+    minDistance: 10,
+    state: {
+        priorLocation: null as Location | null,
+        breadCrumbs: [] as Array<Location>,
+    }
 }
 
 type Options = typeof default_options;
@@ -18,15 +24,15 @@ class Breadcrumbs {
     private markers = [] as Array<L.Marker>;
     private active = false;
     private off = [] as Array<() => void>;
+    private events = new EventManager();
 
-    state = {
-        priorLocation: null as { lat: number; lng: number; } | null,
-        breadCrumbs: [] as Array<{ lat: number; lng: number; }>
-    }
+    private state = {} as Options["state"]
 
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
+        this.state = this.options.state;
+
         this.launchButton = html`<button class="breadcrumb-tool" title="Breadcrumbs">B</button>`;
         // add the button to the map
         document.body.appendChild(this.launchButton);
@@ -39,29 +45,30 @@ class Breadcrumbs {
                 this.stop();
             }
         });
-    }
 
-    restoreState() {
-        const state = localStorage.getItem("breadcrumbs");
-        if (state) {
-            this.state = JSON.parse(state);
-            this.state.breadCrumbs.forEach(breadCrumb => {
-                this.drawBreadcrumb(breadCrumb);
-            })
+        if (this.state.breadCrumbs.length) {
+            this.active = true;
+            this.start();
         }
     }
 
-    saveState() {
-        localStorage.setItem("breadcrumbs", JSON.stringify(this.state));
+    trigger(event: "change", data: any) {
+        this.events.trigger(event, data);
+    }
+
+    on(event: "change", cb: (e: { location: Location }) => void) {
+        return this.events.on(event, cb);
     }
 
     async start() {
-        this.restoreState();
+        this.state.breadCrumbs?.forEach(breadCrumb => {
+            this.drawBreadcrumb(breadCrumb);
+        })
         let { off } = onLocation(currentLocation => {
             if (!this.state.priorLocation) {
                 this.state.priorLocation = currentLocation;
                 this.state.breadCrumbs.push(currentLocation);
-                this.saveState();
+                this.trigger("change", { location: currentLocation });
                 this.drawBreadcrumb(currentLocation);
             } else {
                 // calculate the distance between the current location and the prior location
@@ -73,7 +80,7 @@ class Breadcrumbs {
                 if (distance > this.options.minDistance) {
                     // add the current location to the breadcrumbs
                     this.state.breadCrumbs.push(currentLocation);
-                    this.saveState();
+                    this.trigger("change", { location: currentLocation });
                     this.drawBreadcrumb(currentLocation);
                     // set the current location as the prior location
                     this.state.priorLocation = currentLocation;

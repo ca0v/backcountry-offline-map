@@ -107,4 +107,16 @@ body,
   font-weight: bold;
   visibility: visible;
   outline: 3px solid #3333;
+  cursor: pointer;
+}
+
+.navigator-compass.expanded {
+  width: 0;
+  height: 0;
+  font-size: 50vh;
+  left: 50vw;
+  top: 50vh;
+  background: transparent;
+  color: #3338;
+  outline: none;
 }

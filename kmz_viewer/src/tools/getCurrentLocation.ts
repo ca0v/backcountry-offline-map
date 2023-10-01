@@ -1,5 +1,5 @@
 let currentLocation = { lat: 0, lng: 0 };
-type Location = { lat: number; lng: number; }
+export type Location = { lat: number; lng: number; }
 const listeners = [] as ((event: Location) => void)[];
 
 export function onLocation(cb: (location: Location) => void) {

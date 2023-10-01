@@ -1,24 +1,29 @@
 import type * as LType from "leaflet";
 import { onLocation } from "./getCurrentLocation.js";
 import { html } from "./html.js";
+import { EventManager } from "./EventManager.js";
+import type { Location } from "./getCurrentLocation.js";
+
 declare var L: typeof LType;
 
-const default_options = {}
+const default_options = {
+    location: null as null | Location,
+}
 type Options = typeof default_options;
 
 export class ShowCurrentLocation {
     private readonly map: L.Map;
-    private options: Options;
     private launchButton: HTMLElement;
     private marker: null | L.Marker = null;
     private off = [] as Array<() => void>;
     private active = false;
+    private events = new EventManager();
 
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
-        this.options = Object.freeze(Object.assign({ ...default_options }, options));
         this.launchButton = html`<button class="current-location-tool" title="Show current location">📍</button>`;
-        map.getContainer().appendChild(this.launchButton);
+        this.map.getContainer().appendChild(this.launchButton);
+
         this.launchButton.onclick = async () => {
             if (!this.active) {
                 this.active = true;
@@ -35,6 +40,7 @@ export class ShowCurrentLocation {
                     } else {
                         this.marker.setLatLng(currentLocation);
                     }
+                    this.trigger("change", { location: currentLocation });
                 });
                 this.off.push(off);
             } else {
@@ -42,7 +48,21 @@ export class ShowCurrentLocation {
                 this.off.forEach(off => off());
                 this.marker?.remove();
                 this.marker = null
+                this.trigger("clear", {});
             }
         };
+
+        if (options.location) {
+            this.launchButton.click();
+        }
     }
+
+    trigger(event: string, data: any) {
+        this.events.trigger(event, data);
+    }
+
+    on(event: string, cb: (e: any) => void) {
+        return this.events.on(event, cb);
+    }
+
 }

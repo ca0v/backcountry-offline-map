@@ -1,13 +1,14 @@
 import type * as LType from "leaflet";
 import { toast } from "../toast.js";
 import { onLocation } from "./getCurrentLocation.js";
+import type { Location } from "./getCurrentLocation.js";
 import { onOrientation } from "./orientation.js";
 import { html } from "./html.js";
+import { EventManager } from "./EventManager.js";
 declare var L: typeof LType;
 
 const default_options = {
-    lng: 0,
-    lat: 0
+    location: null as Location | null
 }
 
 type Options = typeof default_options;
@@ -19,6 +20,7 @@ export class NavigateToPoint {
     private launchButton: HTMLElement;
     private active = false;
     private off = [] as Array<() => void>;
+    private events = new EventManager();
 
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
@@ -35,6 +37,7 @@ export class NavigateToPoint {
                     this.off = [];
                 }
                 this.active = false;
+                this.trigger("clear", {});
                 return;
             }
             this.launchButton.textContent = "Click the map...";
@@ -42,34 +45,44 @@ export class NavigateToPoint {
             this.map.once("click", (event) => {
                 this.active = true;
                 const { lat, lng } = event.latlng;
-                this.options = { lat, lng };
+                this.options = { location: { lat, lng } };
                 this.render();
-                toast(`Navigating to point ${lat}, ${lng}`);
-                document.body.appendChild(this.compass);
-
-                // place a marker on the map
-                const marker = L.marker([lat, lng]).addTo(this.map);
-                this.off.push(() => {
-                    marker.remove();
-                    this.compass.remove();
-                    this.launchButton.textContent = "N";
-                })
+                this.trigger("change", { location: { lat, lng } })
             });
+        });
+
+        if (this.options.location) {
+            this.active = true;
+            this.render();
+        }
+
+        this.compass.addEventListener("click", () => {
+            this.compass.classList.toggle("expanded");
         });
     }
 
     async render() {
+        document.body.appendChild(this.compass);
+
+        // place a marker on the map
+        const [lat, lng] = [this.options.location!.lat, this.options.location!.lng];
+        const marker = L.marker([lat, lng]).addTo(this.map);
+        this.off.push(() => {
+            marker.remove();
+            this.compass.remove();
+            this.launchButton.textContent = "N";
+        });
         let currentLocation = { lat: 0, lng: 0 };
         let { off } = onLocation(location => {
             currentLocation = location;
-            const distance = this.map.distance([location.lat, location.lng], [this.options.lat, this.options.lng]);
+            const distance = this.map.distance([location.lat, location.lng], [this.options.location!.lat, this.options.location!.lng]);
             this.launchButton.textContent = asDistance(distance);
         });
         this.off.push(off);
 
         ({ off } = onOrientation(async orientation => {
-            const dx = currentLocation.lng - this.options.lng;
-            const dy = currentLocation.lat - this.options.lat;
+            const dx = currentLocation.lng - this.options.location!.lng;
+            const dy = currentLocation.lat - this.options.location!.lat;
             // what is the angle between the two points?  North should be 0
             const { alpha } = orientation;
             const angle = alpha + Math.atan2(-dy, dx) * 180 / Math.PI - 90;
@@ -78,6 +91,15 @@ export class NavigateToPoint {
         }));
         this.off.push(off);
     }
+
+    trigger(event: string, data: any) {
+        this.events.trigger(event, data);
+    }
+
+    on(event: string, callback: (e: any) => void) {
+        return this.events.on(event, callback);
+    }
+
 }
 
 function asDistance(distanceInMeters: number) {
