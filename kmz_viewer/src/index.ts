@@ -5,7 +5,7 @@ export async function run() {
   const appController = new AppController({});
   appController.loadState();
   window.addEventListener("beforeunload", () => {
-    appController.saveState();
+    //appController.saveState();
   });
   return appController.run();
 }

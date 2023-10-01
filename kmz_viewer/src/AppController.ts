@@ -11,26 +11,29 @@ import { ShowCoordinatesTool } from "./tools/ShowCoordinates.js";
 import type { Location } from "./tools/getCurrentLocation.js";
 import { EventManager } from "./tools/EventManager.js";
 
-const default_options = {
-    state: {
-        priorLocation: null as Location | null,
-        breadCrumbs: [] as Array<Location>,
-        navigatingTo: null as Location | null,
+const default_state = {
+    priorLocation: null as Location | null,
+    breadCrumbs: [] as Array<Location>,
+    navigatingTo: {
+        location: null as Location | null,
+        isExpanded: false
     }
 }
 
+const default_options = {
+    state: default_state
+}
+
+type State = typeof default_state;
 type Options = typeof default_options;
 
 export class AppController {
     private options: Options;
-    private state: Options["state"];
+    private state: State;
 
     constructor(options: Partial<Options>) {
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
         this.state = this.options.state;
-        if (!this.state) {
-            this.loadState();
-        }
     }
 
     // create a two-way communication channel with the service worker
@@ -190,18 +193,17 @@ export class AppController {
             this.saveState();
         });
 
-        const navigateToPointTool = new NavigateToPoint(map,
-            {
-                location: this.state.navigatingTo
-            });
+        const navigateToPointTool = new NavigateToPoint(map, { ...this.state.navigatingTo });
 
         navigateToPointTool.on("change", (e) => {
-            this.state.navigatingTo = e.location;
+            this.state.navigatingTo.location = e.location;
+            this.state.navigatingTo.isExpanded = e.isExpanded;
             this.saveState();
         })
 
         navigateToPointTool.on("clear", (e) => {
-            this.state.navigatingTo = null;
+            this.state.navigatingTo.location = null;
+            this.state.navigatingTo.isExpanded = false;
             this.saveState();
         })
 

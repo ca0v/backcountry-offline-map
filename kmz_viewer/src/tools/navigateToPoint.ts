@@ -8,7 +8,8 @@ import { EventManager } from "./EventManager.js";
 declare var L: typeof LType;
 
 const default_options = {
-    location: null as Location | null
+    location: null as Location | null,
+    isExpanded: false,
 }
 
 type Options = typeof default_options;
@@ -45,9 +46,12 @@ export class NavigateToPoint {
             this.map.once("click", (event) => {
                 this.active = true;
                 const { lat, lng } = event.latlng;
-                this.options = { location: { lat, lng } };
+                this.options = {
+                    location: { lat, lng },
+                    isExpanded: this.options.isExpanded
+                };
                 this.render();
-                this.trigger("change", { location: { lat, lng } })
+                this.trigger("change", { ...this.options })
             });
         });
 
@@ -56,8 +60,12 @@ export class NavigateToPoint {
             this.render();
         }
 
+        this.compass.classList.toggle("expanded", this.options.isExpanded);
+
         this.compass.addEventListener("click", () => {
             this.compass.classList.toggle("expanded");
+            this.options.isExpanded = this.compass.classList.contains("expanded");
+            this.trigger("change", { ...this.options });
         });
     }
 
