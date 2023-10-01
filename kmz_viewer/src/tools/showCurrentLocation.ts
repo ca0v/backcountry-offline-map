@@ -10,7 +10,7 @@ export class ShowCurrentLocation {
     private readonly map: L.Map;
     private options: Options;
     private launchButton: HTMLElement;
-    private marker?: L.Marker;
+    private marker: null | L.Marker = null;
     private off = [] as Array<() => void>;
     private active = false;
 
@@ -41,7 +41,7 @@ export class ShowCurrentLocation {
                 this.active = false;
                 this.off.forEach(off => off());
                 this.marker?.remove();
-this.marker=null
+                this.marker = null
             }
         };
     }
