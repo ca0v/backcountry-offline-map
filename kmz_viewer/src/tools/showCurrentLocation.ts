@@ -41,6 +41,7 @@ export class ShowCurrentLocation {
                 this.active = false;
                 this.off.forEach(off => off());
                 this.marker?.remove();
+this.marker=null
             }
         };
     }
