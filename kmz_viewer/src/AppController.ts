@@ -113,10 +113,10 @@ export class AppController {
     }
 
     showKmlViewer() {
-        const map = L.map("map");
-
-        // remove leaflet attribution
-        map.attributionControl.setPrefix("");
+        const map = L.map("map", {
+            zoomControl: false,
+            attributionControl: false,
+        });
 
         const topo = L.tileLayer(
             "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
