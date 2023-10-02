@@ -4,6 +4,7 @@ import { html } from "./html.js";
 import { EventManager } from "./EventManager.js";
 import type { Location } from "./getCurrentLocation.js";
 
+// 📍
 declare var L: typeof LType;
 
 const default_options = {
@@ -21,7 +22,7 @@ export class ShowCurrentLocation {
 
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
-        this.launchButton = html`<button class="current-location-tool" title="Show current location">📍</button>`;
+        this.launchButton = html`<button class="current-location-tool" title="Show current location">X</button>`;
         this.map.getContainer().appendChild(this.launchButton);
 
         this.launchButton.onclick = async () => {
@@ -34,11 +35,20 @@ export class ShowCurrentLocation {
                         this.marker = L.marker(currentLocation, {
                             icon: L.divIcon({
                                 className: "current_location",
-                                html: "&#x1F4CD;",
+                                iconSize: [24, 24],
+                                html: "X",
                             }),
                         }).addTo(map);
+                        this.off.push(() => {
+                            this.marker?.remove();
+                            this.marker = null;
+                        });
                     } else {
                         this.marker.setLatLng(currentLocation);
+                        // if the current location is off the map, pan to it
+                        if (!map.getBounds().contains(currentLocation)) {
+                            map.panTo(currentLocation);
+                        }
                     }
                     this.trigger("change", { location: currentLocation });
                 });
@@ -46,8 +56,7 @@ export class ShowCurrentLocation {
             } else {
                 this.active = false;
                 this.off.forEach(off => off());
-                this.marker?.remove();
-                this.marker = null
+                this.off = [];
                 this.trigger("clear", {});
             }
         };

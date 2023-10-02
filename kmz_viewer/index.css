@@ -120,3 +120,13 @@ body,
   color: #3338;
   outline: none;
 }
+
+.current_location {
+  border: 3px solid black;
+  outline: 3px solid white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 24px;
+  font-size: 24px;
+  color: red;
+}
