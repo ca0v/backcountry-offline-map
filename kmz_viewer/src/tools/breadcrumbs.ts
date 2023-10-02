@@ -44,19 +44,21 @@ class Breadcrumbs {
                 this.active = false;
                 this.stop();
             }
+            this.launchButton.classList.toggle("active", this.active);
         });
 
         if (this.state.breadCrumbs.length) {
             this.active = true;
             this.start();
+            this.launchButton.classList.toggle("active", this.active);
         }
     }
 
-    trigger(event: "change", data: any) {
+    trigger(event: string, data: any) {
         this.events.trigger(event, data);
     }
 
-    on(event: "change", cb: (e: { location: Location }) => void) {
+    on(event: string, cb: (e: any) => void) {
         return this.events.on(event, cb);
     }
 
@@ -99,12 +101,13 @@ class Breadcrumbs {
         }
         this.off.forEach(off => off());
         this.off = [];
+        this.trigger("clear", {});
     }
 
     drawBreadcrumb(currentLocation: { lat: number; lng: number; }) {
         const marker = L.marker(currentLocation, {
             icon: L.divIcon({
-                className: "current_location",
+                className: "breadcrumb",
                 html: "X",
             }),
         }).addTo(this.map);

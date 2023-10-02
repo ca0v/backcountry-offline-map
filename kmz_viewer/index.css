@@ -69,22 +69,29 @@ body,
   height: 2rem;
 }
 
-.navigate-to-point {
-  position: absolute;
-  z-index: 1000;
-  bottom: 1rem;
-  left: 3rem;
-  width: 2rem;
-  height: 2rem;
-}
-
 .current-location-tool {
   position: absolute;
   z-index: 1000;
   bottom: 1rem;
-  left: 5rem;
+  left: 3.5rem;
   width: 2rem;
   height: 2rem;
+}
+
+.navigate-to-point {
+  position: absolute;
+  z-index: 1000;
+  bottom: 1rem;
+  left: 6rem;
+  width: 4rem;
+  height: 2rem;
+  font-size: 1rem;
+}
+
+.current-location-tool.active,
+.breadcrumb-tool.active,
+.navigate-to-point.active {
+  border-color: green;
 }
 
 .navigator-compass {
@@ -122,11 +129,51 @@ body,
 }
 
 .current_location {
-  border: 3px solid black;
-  outline: 3px solid white;
+  border: 1px solid #0008;
+  outline: 3px solid #fff8;
   border-radius: 50%;
   text-align: center;
-  line-height: 24px;
+  line-height: 18px;
+  font-size: 18px;
+  color: blue;
+  /* linear animation that smoothly fades from white to black and back */
+  animation-name: fade;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+/* animation that smoothly fades from white to black and back */
+@keyframes fade {
+  0% {
+    outline-color: green;
+  }
+  25% {
+    outline-color: transparent;
+  }
+  75% {
+    outline-color: transparent;
+  }
+  100% {
+    outline-color: green;
+  }
+}
+
+.breadcrumb {
+  border: 1px solid black;
+  outline: 1px solid white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 12px;
+  color: blue;
+}
+
+.pin-icon {
+  border: 1px solid black;
+  outline: 1px solid white;
+  border-radius: 50%;
+  text-align: center;
   font-size: 24px;
+  line-height: 24px;
   color: red;
 }

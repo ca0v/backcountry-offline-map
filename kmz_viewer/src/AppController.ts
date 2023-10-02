@@ -219,6 +219,11 @@ export class AppController {
             this.saveState();
         })
 
+        breadcrumbTool.on("clear", (e) => {
+            this.state.breadCrumbs = [];
+            this.saveState();
+        })
+
         new ShowCoordinatesTool(map, {});
 
         // add a button to go to current location

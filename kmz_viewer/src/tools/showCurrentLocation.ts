@@ -35,7 +35,7 @@ export class ShowCurrentLocation {
                         this.marker = L.marker(currentLocation, {
                             icon: L.divIcon({
                                 className: "current_location",
-                                iconSize: [24, 24],
+                                iconSize: [18, 18],
                                 html: "X",
                             }),
                         }).addTo(map);
@@ -59,6 +59,7 @@ export class ShowCurrentLocation {
                 this.off = [];
                 this.trigger("clear", {});
             }
+            this.launchButton.classList.toggle("active", this.active);
         };
 
         if (options.location) {

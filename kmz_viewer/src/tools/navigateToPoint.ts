@@ -7,6 +7,10 @@ import { html } from "./html.js";
 import { EventManager } from "./EventManager.js";
 declare var L: typeof LType;
 
+const ARROW = "⇧";
+const PIN = "📍";//"📍"
+const MARKER_TEXT = "X";//"📍"
+
 const default_options = {
     location: null as Location | null,
     isExpanded: false,
@@ -26,8 +30,8 @@ export class NavigateToPoint {
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
-        this.compass = html`<div class="navigator-compass">⇧</div>`
-        this.launchButton = html`<button class="navigate-to-point" title="Navigate to point">N</button>`;
+        this.compass = html`<div class="navigator-compass">${ARROW}</div>`
+        this.launchButton = html`<button class="navigate-to-point" title="Navigate to point">${ARROW}</button>`;
         // add the button to the map
         document.body.appendChild(this.launchButton);
         // when user clicks the button, listen for a map click and start navigating to that point
@@ -39,9 +43,10 @@ export class NavigateToPoint {
                 }
                 this.active = false;
                 this.trigger("clear", {});
+                this.launchButton.classList.toggle("active", this.active);
                 return;
             }
-            this.launchButton.textContent = "Click the map...";
+            this.launchButton.textContent = PIN;
 
             this.map.once("click", (event) => {
                 this.active = true;
@@ -52,12 +57,14 @@ export class NavigateToPoint {
                 };
                 this.render();
                 this.trigger("change", { ...this.options })
+                this.launchButton.classList.toggle("active", this.active);
             });
         });
 
         if (this.options.location) {
             this.active = true;
             this.render();
+            this.launchButton.classList.toggle("active", this.active);
         }
 
         this.compass.classList.toggle("expanded", this.options.isExpanded);
@@ -74,11 +81,17 @@ export class NavigateToPoint {
 
         // place a marker on the map
         const [lat, lng] = [this.options.location!.lat, this.options.location!.lng];
-        const marker = L.marker([lat, lng]).addTo(this.map);
+        const marker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: "pin-icon",
+                iconSize: [24, 24],
+                html: MARKER_TEXT,
+            }),
+        }).addTo(this.map);
         this.off.push(() => {
             marker.remove();
             this.compass.remove();
-            this.launchButton.textContent = "N";
+            this.launchButton.textContent = ARROW;
         });
         let currentLocation = { lat: 0, lng: 0 };
         let { off } = onLocation(location => {
@@ -114,9 +127,9 @@ function asDistance(distanceInMeters: number) {
     if (distanceInMeters < 100) {
         return `Arrived!`
     }
-    if (distanceInMeters < 1000) {
+    if (distanceInMeters < 100) {
         return `${Math.round(distanceInMeters)} m`;
     } else {
-        return `${Math.round(distanceInMeters / 1000)} km`;
+        return `${(distanceInMeters / 1000).toFixed(1)} km`;
     }
 }
