@@ -1,7 +1,9 @@
 import { html } from "./html.js";
 import { onOrientation } from "./orientation.js";
 
-// ↑⇑
+// ↑⇑⮝
+
+const ARROW = "⮝"
 
 const default_options = {};
 
@@ -13,7 +15,7 @@ export class CompassTool {
     constructor(map: L.Map, options: {}) {
         this.map = map;
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
-        this.compass = html`<div class="north_arrow">⇑</div>`;
+        this.compass = html`<div class="north_arrow">${ARROW}</div>`;
         // add the button to the map
         this.map.getContainer().appendChild(this.compass);
         this.start();
