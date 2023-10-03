@@ -1,5 +1,6 @@
 /* 🎯 */
 body {
+  --distance-remaining: "3mi";
   background-color: #333;
   color: #999;
 }
@@ -30,34 +31,31 @@ body,
   text-align: center;
 }
 
-#north_arrow {
-  --size: 1.5rem;
+.north_arrow {
   --orientation: 0deg;
   rotate: var(--orientation);
   position: absolute;
   top: 1rem;
   right: 1rem;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid white;
+  border-radius: 50%;
   color: #333;
   z-index: 1000;
-  background: #cccc;
-  border-radius: var(--size);
-  width: var(--size);
-  height: var(--size);
+  background: #000c;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 1.5rem;
   visibility: visible;
-  outline: 3px solid #3333;
 }
 
-#north_arrow::before {
-  content: "⇧"; /* ⇩⇧ 0 => south, 180 => north */
+.north_arrow {
   color: #0f0;
 }
 
-#north_arrow.not-north::before {
+.north_arrow.not-north {
   color: #f00;
 }
 
@@ -84,9 +82,18 @@ body,
   z-index: 1000;
   bottom: 1rem;
   left: 6rem;
-  width: 4rem;
+  width: 2rem;
   height: 2rem;
   font-size: 1rem;
+}
+
+.navigate-to-icon {
+  color: red;
+  font-size: 3rem;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  font-weight: bolder;
 }
 
 .current-location-tool.active,
@@ -116,6 +123,20 @@ body,
   visibility: visible;
   outline: 3px solid #3333;
   cursor: pointer;
+}
+
+.navigator-compass::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(270deg);
+  content: var(--distance-remaining);
+  font-size: 1.5rem;
+  white-space: nowrap;
+  color: black;
+  background-color: #fff8;
+  border-radius: 0.5rem;
+  padding: 0 0.25rem;
 }
 
 .navigator-compass.expanded {

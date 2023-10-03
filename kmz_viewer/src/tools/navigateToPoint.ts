@@ -13,7 +13,6 @@ const MARKER_TEXT = "X";//"📍"
 
 const default_options = {
     location: null as Location | null,
-    isExpanded: false,
 }
 
 type Options = typeof default_options;
@@ -30,7 +29,7 @@ export class NavigateToPoint {
     constructor(map: L.Map, options: Partial<Options>) {
         this.map = map;
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
-        this.compass = html`<div class="navigator-compass">${ARROW}</div>`
+        this.compass = html`<div class="navigator-compass expanded">${ARROW}</div>`
         this.launchButton = html`<button class="navigate-to-point" title="Navigate to point">${ARROW}</button>`;
         // add the button to the map
         document.body.appendChild(this.launchButton);
@@ -53,7 +52,6 @@ export class NavigateToPoint {
                 const { lat, lng } = event.latlng;
                 this.options = {
                     location: { lat, lng },
-                    isExpanded: this.options.isExpanded
                 };
                 this.render();
                 this.trigger("change", { ...this.options })
@@ -67,11 +65,7 @@ export class NavigateToPoint {
             this.launchButton.classList.toggle("active", this.active);
         }
 
-        this.compass.classList.toggle("expanded", this.options.isExpanded);
-
         this.compass.addEventListener("click", () => {
-            this.compass.classList.toggle("expanded");
-            this.options.isExpanded = this.compass.classList.contains("expanded");
             this.trigger("change", { ...this.options });
         });
     }
@@ -83,7 +77,7 @@ export class NavigateToPoint {
         const [lat, lng] = [this.options.location!.lat, this.options.location!.lng];
         const marker = L.marker([lat, lng], {
             icon: L.divIcon({
-                className: "pin-icon",
+                className: "navigate-to-icon",
                 iconSize: [24, 24],
                 html: MARKER_TEXT,
             }),
@@ -97,7 +91,8 @@ export class NavigateToPoint {
         let { off } = onLocation(location => {
             currentLocation = location;
             const distance = this.map.distance([location.lat, location.lng], [this.options.location!.lat, this.options.location!.lng]);
-            this.launchButton.textContent = asDistance(distance);
+            // set the --distance-remaining css variable
+            document.body.style.setProperty("--distance-remaining", `"${asDistance(distance)}"`);
         });
         this.off.push(off);
 

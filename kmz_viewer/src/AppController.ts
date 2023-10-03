@@ -8,6 +8,7 @@ import { onOrientation } from "./tools/orientation.js";
 import { NavigateToPoint } from "./tools/navigateToPoint.js"
 import { ShowCurrentLocation } from "./tools/showCurrentLocation.js";
 import { ShowCoordinatesTool } from "./tools/ShowCoordinates.js";
+import { CompassTool } from "./tools/CompassTool.js";
 import type { Location } from "./tools/getCurrentLocation.js";
 import { EventManager } from "./tools/EventManager.js";
 
@@ -16,7 +17,6 @@ const default_state = {
     breadCrumbs: [] as Array<Location>,
     navigatingTo: {
         location: null as Location | null,
-        isExpanded: false
     }
 }
 
@@ -97,8 +97,6 @@ export class AppController {
 
         await this.installServiceWorker();
         this.showKmlViewer();
-
-        this.listenForChangesToDeviceOrientation();
     }
 
     async installServiceWorker() {
@@ -197,13 +195,11 @@ export class AppController {
 
         navigateToPointTool.on("change", (e) => {
             this.state.navigatingTo.location = e.location;
-            this.state.navigatingTo.isExpanded = e.isExpanded;
             this.saveState();
         })
 
         navigateToPointTool.on("clear", (e) => {
             this.state.navigatingTo.location = null;
-            this.state.navigatingTo.isExpanded = false;
             this.saveState();
         })
 
@@ -225,34 +221,8 @@ export class AppController {
         })
 
         new ShowCoordinatesTool(map, {});
+        new CompassTool(map, {});
 
-        // add a button to go to current location
-        if (document.querySelector(".north_arrow")) {
-            const northArrow = document.querySelector(".north_arrow")!;
-            // set the text to an up arrow
-            northArrow.innerHTML = "&#8593;";
-        }
-    }
-
-    listenForChangesToDeviceOrientation() {
-        // listen for a DeviceMotionEvent
-        const orientationArrow = document.getElementById("north_arrow")!;
-        onOrientation(orientation => {
-            const { alpha, beta, gamma } = orientation;
-            if (typeof alpha === "number" && typeof beta === "number") {
-                if (beta > 45) {
-                    orientationArrow.style.visibility = "hidden";
-                }
-                if (beta < 45) {
-                    orientationArrow.style.visibility = "visible";
-                    orientationArrow.style.setProperty("--orientation", `${alpha}deg`);
-                    orientationArrow.classList.toggle(
-                        "not-north",
-                        alpha < -15 || alpha > 15
-                    );
-                }
-            }
-        });
     }
 
     saveState() {
