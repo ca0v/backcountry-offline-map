@@ -80,6 +80,17 @@ class Breadcrumbs {
                 );
                 // if the distance is greater than the minimum distance
                 if (distance > this.options.minDistance) {
+                    // is it near any existing breadcrumbs?  If so, ignore
+                    const near = this.state.breadCrumbs.some(breadCrumb => {
+                        const distance = this.map.distance(
+                            [currentLocation.lat, currentLocation.lng],
+                            [breadCrumb.lat, breadCrumb.lng]
+                        );
+                        return distance < this.options.minDistance;
+                    });
+                    if (near) {
+                        return;
+                    }
                     // add the current location to the breadcrumbs
                     this.state.breadCrumbs.push(currentLocation);
                     this.trigger("change", { location: currentLocation });
@@ -107,8 +118,9 @@ class Breadcrumbs {
     drawBreadcrumb(currentLocation: { lat: number; lng: number; }) {
         const marker = L.marker(currentLocation, {
             icon: L.divIcon({
+                iconSize: [12, 12],
                 className: "breadcrumb",
-                html: "X",
+                html: "●",
             }),
         }).addTo(this.map);
         this.markers.push(marker);
