@@ -123,6 +123,8 @@ body,
 
 .navigator-compass.expanded::after {
   position: absolute;
+  top: 4vmin;
+  left: -7vmin;
   transform: rotate(270deg);
   content: var(--distance-remaining);
   /* using vmin to determine font size */
