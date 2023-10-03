@@ -7,7 +7,7 @@ import { html } from "./html.js";
 import { EventManager } from "./EventManager.js";
 declare var L: typeof LType;
 
-const ARROW = "⇑"; //⇧
+const ARROW = "⇈"; //⇧⇑
 const PIN = "📍";//"📍"
 const MARKER_TEXT = "X";//"📍"
 

@@ -1,9 +1,9 @@
 import { html } from "./html.js";
 import { onOrientation } from "./orientation.js";
 
-// ↑⇑⮝
+// ↑⇑⮝⇧
 
-const ARROW = "⮝"
+const ARROW = "⇧"
 
 const default_options = {};
 
