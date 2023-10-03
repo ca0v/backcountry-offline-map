@@ -129,15 +129,16 @@ body,
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -20%) rotate(270deg);
+  transform: translate(-50%, 0%) rotate(270deg);
   content: var(--distance-remaining);
   /* using vmin to determine font size */
-  font-size: 6vmin;
+  font-size: 4vmin;
   white-space: nowrap;
   color: black;
-  background-color: #fff8;
   border-radius: 0.5rem;
   padding: 0 0.25rem;
+  /* shadow text in white */
+  text-shadow: 0 0 10px white;
 }
 
 .navigator-compass.expanded {
