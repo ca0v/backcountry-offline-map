@@ -41,7 +41,7 @@ body,
   height: 2rem;
   border: 3px solid white;
   border-radius: 50%;
-  color: #333;
+  color: #0f0;
   z-index: 1000;
   background: #000c;
   display: flex;
@@ -51,12 +51,8 @@ body,
   visibility: visible;
 }
 
-.north_arrow {
-  color: #0f0;
-}
-
 .north_arrow.not-north {
-  color: #f00;
+  background-color: red;
 }
 
 .breadcrumb-tool {
