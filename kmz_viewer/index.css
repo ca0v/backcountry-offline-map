@@ -131,7 +131,8 @@ body,
   left: 50%;
   transform: translate(-50%, -50%) rotate(270deg);
   content: var(--distance-remaining);
-  font-size: 1.5rem;
+  /* using vmin to determine font size */
+  font-size: 6vmin;
   white-space: nowrap;
   color: black;
   background-color: #fff8;
