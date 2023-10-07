@@ -2,13 +2,13 @@ import type * as LType from "leaflet";
 import { onLocation } from "./getCurrentLocation.js";
 import { html } from "./html.js";
 import { EventManager } from "./EventManager.js";
-import type { Location } from "./getCurrentLocation.js";
+import type { GeoLocation } from "./getCurrentLocation.js";
 
 // 📍
 declare var L: typeof LType;
 
 const default_options = {
-    location: null as null | Location,
+    location: null as null | GeoLocation,
 }
 type Options = typeof default_options;
 

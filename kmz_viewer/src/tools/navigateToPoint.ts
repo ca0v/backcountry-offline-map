@@ -1,7 +1,7 @@
 import type * as LType from "leaflet";
 import { toast } from "../toast.js";
 import { onLocation } from "./getCurrentLocation.js";
-import type { Location } from "./getCurrentLocation.js";
+import type { GeoLocation } from "./getCurrentLocation.js";
 import { onOrientation } from "./orientation.js";
 import { html } from "./html.js";
 import { EventManager } from "./EventManager.js";
@@ -12,7 +12,7 @@ const PIN = "📍";//"📍"
 const MARKER_TEXT = "X";//"📍"
 
 const default_options = {
-    location: null as Location | null,
+    location: null as GeoLocation | null,
 }
 
 type Options = typeof default_options;

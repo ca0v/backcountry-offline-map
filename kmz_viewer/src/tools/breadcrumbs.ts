@@ -1,17 +1,23 @@
 import type * as LType from "leaflet";
 import { html } from "./html.js";
 import { onLocation } from "./getCurrentLocation.js";
-import type { Location } from "./getCurrentLocation.js";
+import type { GeoLocation } from "./getCurrentLocation.js";
 import { EventManager } from "./EventManager.js";
 declare var L: typeof LType;
 
 export { Breadcrumbs };
+export type { Breadcrumb };
+
+interface Breadcrumb {
+    location: GeoLocation;
+    timestamp: number;
+};
 
 const default_options = {
     minDistance: 10,
     state: {
-        priorLocation: null as Location | null,
-        breadCrumbs: [] as Array<Location>,
+        priorLocation: null as GeoLocation | null,
+        breadcrumbs: [] as Array<Breadcrumb>,
     }
 }
 
@@ -47,7 +53,7 @@ class Breadcrumbs {
             this.launchButton.classList.toggle("active", this.active);
         });
 
-        if (this.state.breadCrumbs.length) {
+        if (this.state.breadcrumbs.length) {
             this.active = true;
             this.start();
             this.launchButton.classList.toggle("active", this.active);
@@ -63,13 +69,19 @@ class Breadcrumbs {
     }
 
     async start() {
-        this.state.breadCrumbs?.forEach(breadCrumb => {
-            this.drawBreadcrumb(breadCrumb);
-        })
+        if (this.state.breadcrumbs?.length) {
+            const recentBreadcrumb = this.state.breadcrumbs.filter(c => c.timestamp > Date.now() - 1000 * 60 * 60 * 24 * 0.5);
+            console.log(`adding breadcrumbs: ${recentBreadcrumb.length}`)
+            recentBreadcrumb.forEach(breadCrumb => this.drawBreadcrumb(breadCrumb.location));
+        }
+
         let { off } = onLocation(currentLocation => {
             if (!this.state.priorLocation) {
                 this.state.priorLocation = currentLocation;
-                this.state.breadCrumbs.push(currentLocation);
+                this.state.breadcrumbs.push({
+                    location: currentLocation,
+                    timestamp: Date.now(),
+                });
                 this.trigger("change", { location: currentLocation });
                 this.drawBreadcrumb(currentLocation);
             } else {
@@ -81,10 +93,10 @@ class Breadcrumbs {
                 // if the distance is greater than the minimum distance
                 if (distance > this.options.minDistance) {
                     // is it near any existing breadcrumbs?  If so, ignore
-                    const near = this.state.breadCrumbs.some(breadCrumb => {
+                    const near = this.state.breadcrumbs.some(breadcrumb => {
                         const distance = this.map.distance(
                             [currentLocation.lat, currentLocation.lng],
-                            [breadCrumb.lat, breadCrumb.lng]
+                            [breadcrumb.location.lat, breadcrumb.location.lng]
                         );
                         return distance < this.options.minDistance;
                     });
@@ -92,7 +104,7 @@ class Breadcrumbs {
                         return;
                     }
                     // add the current location to the breadcrumbs
-                    this.state.breadCrumbs.push(currentLocation);
+                    this.state.breadcrumbs.push({ location: currentLocation, timestamp: Date.now() });
                     this.trigger("change", { location: currentLocation });
                     this.drawBreadcrumb(currentLocation);
                     // set the current location as the prior location
@@ -106,12 +118,12 @@ class Breadcrumbs {
     stop() {
         this.markers.forEach(marker => marker.remove());
         this.markers = [];
-        this.state = {
-            priorLocation: null,
-            breadCrumbs: []
-        }
         this.off.forEach(off => off());
         this.off = [];
+        this.trigger("stop", {});
+    }
+
+    clear() {
         this.trigger("clear", {});
     }
 

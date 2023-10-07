@@ -1,39 +1,51 @@
 import type * as LType from "leaflet";
 declare var L: typeof LType;
 
+import type { Breadcrumb } from "./tools/breadcrumbs.js";
+import type { GeoLocation } from "./tools/getCurrentLocation.js";
+
 import { readQueryFlags } from "./readQueryFlags.js";
-import { toast } from "./toast.js";
 import { Breadcrumbs } from "./tools/breadcrumbs.js";
-import { onOrientation } from "./tools/orientation.js";
 import { NavigateToPoint } from "./tools/navigateToPoint.js"
 import { ShowCurrentLocation } from "./tools/showCurrentLocation.js";
 import { ShowCoordinatesTool } from "./tools/ShowCoordinates.js";
 import { CompassTool } from "./tools/CompassTool.js";
-import type { Location } from "./tools/getCurrentLocation.js";
 import { EventManager } from "./tools/EventManager.js";
 
 const default_state = {
-    priorLocation: null as Location | null,
-    breadCrumbs: [] as Array<Location>,
+    priorLocation: null as GeoLocation | null,
+    breadcrumbs: [] as Array<Breadcrumb>,
     navigatingTo: {
-        location: null as Location | null,
+        location: null as GeoLocation | null,
     }
 }
 
 const default_options = {
-    state: default_state
 }
 
-type State = typeof default_state;
+export type State = typeof default_state;
 type Options = typeof default_options;
 
 export class AppController {
     private options: Options;
-    private state: State;
+    private state: Partial<State>;
+    private eventManager = new EventManager();
 
-    constructor(options: Partial<Options>) {
+    constructor(options: Partial<Options>, state: Partial<State>) {
         this.options = Object.freeze(Object.assign({ ...default_options }, options));
-        this.state = this.options.state;
+        this.state = state;
+    }
+
+    off() {
+        this.eventManager.off();
+    }
+
+    on(topic: string, data: any) {
+        return this.eventManager.on(topic, data);
+    }
+
+    trigger(topic: string, data: any) {
+        this.eventManager.trigger(topic, data);
     }
 
     // create a two-way communication channel with the service worker
@@ -95,7 +107,7 @@ export class AppController {
             this.postMessageToServiceWorker({ command: "clearCacheCode" });
         }
 
-        await this.installServiceWorker();
+        // await this.installServiceWorker();
         this.showKmlViewer();
     }
 
@@ -124,8 +136,6 @@ export class AppController {
             }
         );
         topo.addTo(map);
-
-
 
         // allow user to draw lines on the map
         const drawnItems = new L.FeatureGroup();
@@ -183,41 +193,45 @@ export class AppController {
         });
         currentLocationTool.on("change", (e) => {
             this.state.priorLocation = e.location;
-            this.saveState();
+            this.trigger("StateChange", this.state);
         })
 
         currentLocationTool.on("clear", (e) => {
             this.state.priorLocation = null;
-            this.saveState();
+            this.trigger("StateChange", this.state);
         });
 
         const navigateToPointTool = new NavigateToPoint(map, { ...this.state.navigatingTo });
 
         navigateToPointTool.on("change", (e) => {
+            if (!this.state.navigatingTo) this.state.navigatingTo = { location: null };
             this.state.navigatingTo.location = e.location;
-            this.saveState();
+            this.trigger("StateChange", this.state);
         })
 
         navigateToPointTool.on("clear", (e) => {
+            if (!this.state.navigatingTo) return;
             this.state.navigatingTo.location = null;
-            this.saveState();
+            this.trigger("StateChange", this.state);
         })
 
         const breadcrumbTool = new Breadcrumbs(map, {
-            minDistance: 10, state: {
-                priorLocation: this.state.priorLocation,
-                breadCrumbs: this.state.breadCrumbs
+            minDistance: 10,
+            state: {
+                priorLocation: this.state.priorLocation || null,
+                breadcrumbs: this.state.breadcrumbs || []
             }
         });
 
         breadcrumbTool.on("change", (e) => {
-            this.state.breadCrumbs.push(e.location);
-            this.saveState();
+            if (!this.state.breadcrumbs) this.state.breadcrumbs = [];
+            this.state.breadcrumbs.push(e.location);
+            this.trigger("StateChange", this.state);
         })
 
         breadcrumbTool.on("clear", (e) => {
-            this.state.breadCrumbs = [];
-            this.saveState();
+            this.state.breadcrumbs = [];
+            this.trigger("StateChange", this.state);
         })
 
         new ShowCoordinatesTool(map, {});
@@ -225,17 +239,4 @@ export class AppController {
 
     }
 
-    saveState() {
-        const data = JSON.stringify(this.state);
-        localStorage.setItem("state", data);
-        console.log(`state saved: ${data}`)
-    }
-
-    loadState() {
-        const state = localStorage.getItem("state");
-        if (state) {
-            console.log(`state loaded: ${state}`)
-            this.state = JSON.parse(state);
-        }
-    }
 }

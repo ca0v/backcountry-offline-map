@@ -1,6 +1,10 @@
 export class EventManager {
     private events = new Map<string, Array<(data: any) => void>>();
 
+    off() {
+        this.events.clear();
+    }
+
     on(event: string, callback: (data: any) => void) {
         const callbacks = this.events.get(event) || [];
         callbacks.push(callback);

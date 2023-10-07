@@ -1,8 +1,10 @@
 let currentLocation = { lat: 0, lng: 0 };
-export type Location = { lat: number; lng: number; }
-const listeners = [] as ((event: Location) => void)[];
 
-export function onLocation(cb: (location: Location) => void) {
+export type GeoLocation = { lat: number; lng: number; }
+
+const listeners = [] as ((event: GeoLocation) => void)[];
+
+export function onLocation(cb: (location: GeoLocation) => void) {
     listeners.push(cb);
     cb(currentLocation);
     return {
@@ -22,7 +24,7 @@ navigator.geolocation.watchPosition(
 );
 
 
-async function getCurrentLocation() {
+export async function getCurrentLocation() {
     return await new Promise<{ lat: number; lng: number; }>(
         (resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
