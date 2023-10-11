@@ -4,7 +4,6 @@ declare var L: typeof LType;
 import type { Breadcrumb } from "./tools/breadcrumbs.js";
 import type { GeoLocation } from "./tools/getCurrentLocation.js";
 
-import { readQueryFlags } from "./readQueryFlags.js";
 import { Breadcrumbs } from "./tools/breadcrumbs.js";
 import { NavigateToPoint } from "./tools/navigateToPoint.js"
 import { ShowCurrentLocation } from "./tools/showCurrentLocation.js";
@@ -75,51 +74,9 @@ export class AppController {
         }
     }
 
-    postMessageToServiceWorker(message: { command: string; }) {
-        const channel1 = new MessageChannel();
-        channel1.port1.onmessage = (event: MessageEvent<any>) => { };
-        navigator.serviceWorker.controller?.postMessage(message, [channel1.port2]);
-    }
-
     async run() {
-        // this seems to be the best way to deal with versioning...
-        // it will force the app to re-install
-        const queryFlags = readQueryFlags();
-        if (queryFlags.reinstall) {
-            const registration = await navigator.serviceWorker.getRegistration();
-            if (registration) {
-                registration.unregister();
-                console.log("service worker unregistered");
-                const mapDiv = document.querySelector("#map")!;
-                mapDiv.innerHTML = "Service worker unregistered";
-                return;
-            }
-        }
-        if (queryFlags.clear_cache) {
-            this.postMessageToServiceWorker({ command: "clearCache" });
-        }
-
-        if (queryFlags.clear_tile_cache) {
-            this.postMessageToServiceWorker({ command: "clearCacheTiles" });
-        }
-
-        if (queryFlags.clear_code_cache) {
-            this.postMessageToServiceWorker({ command: "clearCacheCode" });
-        }
-
         // await this.installServiceWorker();
         this.showKmlViewer();
-    }
-
-    async installServiceWorker() {
-        try {
-            await navigator.serviceWorker.register("./service-worker.js");
-        } catch (registrationError) {
-            console.error("SW registration failed: ", registrationError);
-            throw registrationError;
-        }
-        this.postMessageToServiceWorker({ command: "ping" });
-        this.postMessageToServiceWorker({ command: "getVersionInfo" });
     }
 
     showKmlViewer() {

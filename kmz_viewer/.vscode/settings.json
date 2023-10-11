@@ -6,6 +6,7 @@
   },
   // do not search .js files
   "search.exclude": {
-    "**/*.js": true
+    "**/*.js": true,
+    "**/*.js.map": true
   }
 }

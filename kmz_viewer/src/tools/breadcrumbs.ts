@@ -94,6 +94,9 @@ class Breadcrumbs {
                 if (distance > this.options.minDistance) {
                     // is it near any existing breadcrumbs?  If so, ignore
                     const near = this.state.breadcrumbs.some(breadcrumb => {
+                        if (!breadcrumb.location) {
+                            return;
+                        }
                         const distance = this.map.distance(
                             [currentLocation.lat, currentLocation.lng],
                             [breadcrumb.location.lat, breadcrumb.location.lng]
