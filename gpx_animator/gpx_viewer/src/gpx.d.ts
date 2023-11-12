@@ -5,11 +5,9 @@ export interface Gpx {
 }
 
 export interface Attributes {
+  id: string;
   version: string;
   creator: string;
-}
-
-export interface Attributes {
   lat: string;
   lon: string;
 }

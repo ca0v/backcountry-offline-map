@@ -86,7 +86,7 @@ async function init() {
 
   map.on("load", async () => {
     setupRequestToImportFileHandler(map);
-    const points = await loadJsonFile("../data/explore/track_points.geojson");
+    const points = await loadGpxFile("../data/explore.gpx");
     await loadGeoJson(map, points);
   });
 }
@@ -122,7 +122,6 @@ async function loadGeoJson(map: Map, points: GeoJson) {
 
   await sleep(5000);
   await playbackRoute(map, points);
-
 }
 
 init();
@@ -169,9 +168,42 @@ function gpx_to_geojson(gpxContent: string) {
   const parser = new DOMParser();
   const xml = parser.parseFromString(gpxContent, "text/xml");
   const geoJsonContent = xmlToJson(xml.documentElement) as Gpx;
-  console.log("geoJsonContent", JSON.stringify(geoJsonContent));
 
-  return geoJsonContent;
+  const result = {} as GeoJson;
+  result.features = [];
+  result.type = "FeatureCollection";
+  result.name = "track_points";
+  result.crs = {
+    type: "name",
+    properties: {
+      name: "urn:ogc:def:crs:OGC:1.3:CRS84",
+    },
+  };
+
+  geoJsonContent.trk.forEach((trk) => {
+    trk.trkseg.trkpt.forEach((trkpt) => {
+      const feature = {} as any;
+      feature.type = "Feature";
+      feature.properties = {
+        track_fid: trk["@attributes"].id,
+        track_seg_id: trk.trkseg["@attributes"].id,
+        track_seg_point_id: trkpt["@attributes"].id,
+        ele: trkpt.ele,
+        time: trkpt.time,
+        desc: trkpt.desc,
+      };
+      feature.geometry = {
+        type: "Point",
+        coordinates: [
+          parseFloat(trkpt["@attributes"].lon),
+          parseFloat(trkpt["@attributes"].lat),
+        ],
+      };
+      result.features.push(feature);
+    });
+  });
+
+  return result;
 }
 
 function xmlToJson(xml: Element) {
@@ -229,7 +261,7 @@ async function playbackRoute(map: Map, points: GeoJson) {
         type: "Point",
         coordinates: [lng, lat],
       },
-    }
+    };
 
     // render a red marker at this location
     map.addSource("marker", {
@@ -258,3 +290,8 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function loadGpxFile(fileName: string) {
+  const response = await fetch(fileName);
+  const gpxContent = await response.text();
+  return gpx_to_geojson(gpxContent);
+}
