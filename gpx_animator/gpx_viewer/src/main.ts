@@ -14,7 +14,7 @@ function writeLocalStorage(name: string, value: any) {
 // if user presses "I", create an drag-and-drop zone that allows user to drop a file
 // if user drops a file, read the file and display it on the map
 // if user presses "I" again, remove the drag-and-drop zone
-function setupRequestToImportFileHandler() {
+function setupRequestToImportFileHandler(map: Map) {
   let hasDropZone = false;
 
   const onDrop = (e:DragEvent) => {
@@ -25,7 +25,18 @@ function setupRequestToImportFileHandler() {
     // read the file and display it on the map
     const reader = new FileReader();
     reader.onload = (e) => {
-      console.log('File content', e.target?.result);
+      const fileContent = e.target?.result;
+      if (!fileContent) return;
+      console.log('File content', fileContent);
+      const gpxContent = fileContent.toString();
+
+      const geoJsonContent = gpx_to_geojson(gpxContent);
+      // display the GPX file on the map
+      const source = map.addSource("gpx",{
+        type: "geojson",
+        data: geoJsonContent,
+      });
+
     };
     reader.readAsText(file);
   };
@@ -72,8 +83,59 @@ function init() {
   config.apiKey = apiKey;
   const map = new Map({ container });
 
-  console.log('The map instance', map);
-  setupRequestToImportFileHandler();
+  setupRequestToImportFileHandler(map);
 }
 
 init();
+
+function gpx_to_geojson(gpxContent: string) {
+  // convert the xml to json
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(gpxContent, "text/xml");
+  const geoJsonContent = xmlToJson(xml.documentElement);
+  console.log('geoJsonContent', geoJsonContent);
+  return geoJsonContent;
+}
+
+function xmlToJson(xml: Element) {
+  // Create the return object
+  var obj: any = {};
+
+  if (xml.nodeType == 1) {
+    // element
+    // do attributes
+    if (xml.attributes) {
+      obj['@attributes'] = {};
+      for (var j = 0; j < xml.attributes.length; j++) {
+        var attribute = xml.attributes.item(j);
+        if (attribute) {
+          obj['@attributes'][attribute.nodeName] = attribute.nodeValue;
+        }
+      }
+    }
+  } else if (xml.nodeType == 3) {
+    // text
+    obj = xml.nodeValue;
+  }
+
+  // do children
+  if (xml.hasChildNodes()) {
+    for (var i = 0; i < xml.childNodes.length; i++) {
+      var item = xml.childNodes.item(i);
+      if (item) {
+        var nodeName = item.nodeName;
+        if (typeof obj[nodeName] == 'undefined') {
+          obj[nodeName] = xmlToJson(item as Element);
+        } else {
+          if (typeof obj[nodeName].push == 'undefined') {
+            var old = obj[nodeName];
+            obj[nodeName] = [];
+            obj[nodeName].push(old);
+          }
+          obj[nodeName].push(xmlToJson(item as Element));
+        }
+      }
+    }
+  }
+  return obj;
+}
