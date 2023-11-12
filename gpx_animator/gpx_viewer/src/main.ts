@@ -2,6 +2,70 @@ import '@maptiler/sdk/dist/maptiler-sdk.css';
 import './style.css';
 import { config, Map } from '@maptiler/sdk';
 
+export interface Root {
+  "@attributes": Attributes
+  "#text": string[]
+  trk: Trk[]
+}
+
+export interface Attributes {
+  version: string
+  creator: string
+}
+
+export interface Attributes {
+  lat: string
+  lon: string
+}
+
+export interface Trk {
+  "@attributes": Attributes
+  "#text": string[]
+  name: Name
+  desc: Desc
+  trkseg: Trkseg
+}
+
+export interface Name {
+  "@attributes": Attributes
+  "#text": string
+}
+
+export interface Desc {
+  "@attributes": Attributes
+  "#text": string
+}
+
+export interface Trkseg {
+  "@attributes": Attributes
+  "#text": string[]
+  trkpt: Trkpt[]
+}
+
+export interface Trkpt {
+  "@attributes": Attributes
+  "#text": string[]
+  ele: Ele
+  time: Time
+  desc: Desc2
+}
+
+export interface Ele {
+  "@attributes": Attributes
+  "#text": string
+}
+
+export interface Time {
+  "@attributes": Attributes
+  "#text": string
+}
+
+export interface Desc2 {
+  "@attributes": Attributes
+  "#text": string
+}
+
+
 function readLocalStorage(name: string) {
   const value = localStorage.getItem(name);
   return value ? JSON.parse(value) : null;
@@ -32,7 +96,7 @@ function setupRequestToImportFileHandler(map: Map) {
 
       const geoJsonContent = gpx_to_geojson(gpxContent);
       // display the GPX file on the map
-      const source = map.addSource("gpx",{
+      map.addSource("gpx",{
         type: "geojson",
         data: geoJsonContent,
       });
@@ -68,7 +132,7 @@ function setupRequestToImportFileHandler(map: Map) {
   }
 }
 
-function init() {
+async function init() {
   const container = document.getElementById('app');
 
   if (!container) throw new Error('There is no div with the id: "map" ');
@@ -83,7 +147,36 @@ function init() {
   config.apiKey = apiKey;
   const map = new Map({ container });
 
-  setupRequestToImportFileHandler(map);
+  map.on("load", async () => {
+    setupRequestToImportFileHandler(map);
+    await loadTrackPoints(map)  
+  });
+
+}
+
+async function loadTrackPoints(map: Map) {
+  // read the track points from ../data/explore/track_points.geojson
+  const track_points = await fetch('../data/explore/track_points.geojson');
+  const track_points_json = await track_points.json();
+
+  console.log({track_points, track_points_json});
+
+  map.addSource("track_points",{
+    type: "geojson",
+    data: track_points_json,
+  });
+
+  // render the source on the map
+  map.addLayer({
+    id: "track_points",
+    type: "circle",
+    source: "track_points",
+    paint: {
+      "circle-radius": 5,
+      "circle-color": "#007cbf",
+    },
+  });
+
 }
 
 init();
@@ -92,8 +185,9 @@ function gpx_to_geojson(gpxContent: string) {
   // convert the xml to json
   const parser = new DOMParser();
   const xml = parser.parseFromString(gpxContent, "text/xml");
-  const geoJsonContent = xmlToJson(xml.documentElement);
-  console.log('geoJsonContent', geoJsonContent);
+  const geoJsonContent = xmlToJson(xml.documentElement) as Root;
+  console.log('geoJsonContent', JSON.stringify(geoJsonContent));
+  
   return geoJsonContent;
 }
 
