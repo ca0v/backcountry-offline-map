@@ -7,3 +7,13 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+.drop-zone {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 4rem;
+  height: 4rem;
+  border: 1px solid red;
+  background-color: white;
+}
