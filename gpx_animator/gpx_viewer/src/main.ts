@@ -2,7 +2,7 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 import "./style.css";
 import { Gpx } from "./gpx";
 import { config, Map } from "@maptiler/sdk";
-import { GeoJson } from "./geojson";
+import { GeoJson, Geometry } from "./geojson";
 
 function readLocalStorage(name: string) {
   const value = localStorage.getItem(name);
@@ -94,7 +94,7 @@ async function init() {
 async function loadGeoJson(map: Map, points: GeoJson) {
   // read the track points from ../data/explore/track_points.geojson
 
-  const source = map.addSource("track_points", {
+  map.addSource("track_points", {
     type: "geojson",
     data: points,
   });
@@ -119,6 +119,10 @@ async function loadGeoJson(map: Map, points: GeoJson) {
       padding: 20,
     });
   }
+
+  await sleep(5000);
+  await playbackRoute(map, points);
+
 }
 
 init();
@@ -153,7 +157,6 @@ function parseGeoJsonDate(date: string) {
     parseInt(second)
   );
 }
-
 
 async function loadJsonFile(fileName: string) {
   const track_points = await fetch(fileName);
@@ -213,3 +216,45 @@ function xmlToJson(xml: Element) {
   }
   return obj;
 }
+
+async function playbackRoute(map: Map, points: GeoJson) {
+  for (let i = 0; i < points.features.length; i++) {
+    const feature = points.features[i];
+    const geometry = feature.geometry as Geometry;
+    const [lng, lat] = geometry.coordinates;
+
+    const data = {
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [lng, lat],
+      },
+    }
+
+    // render a red marker at this location
+    map.addSource("marker", {
+      type: "geojson",
+      data: data,
+    });
+
+    map.addLayer({
+      id: "marker",
+      type: "circle",
+      source: "marker",
+      paint: {
+        "circle-radius": 5,
+        "circle-color": "#ff0000",
+      },
+    });
+
+    await sleep(100);
+    // remove the marker
+    map.removeLayer("marker");
+    map.removeSource("marker");
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
