@@ -75,16 +75,22 @@ async function init() {
   }
 
   config.apiKey = apiKey;
-  const map = new Map({ container });
+
+  // map without the zoom in/out buttons
+  const map = new Map({ container, attributionControl: false, geolocateControl: false, navigationControl: false });
 
   map.on("load", async () => {
     setupRequestToImportFileHandler(map);
-    const points = await loadGpxFile("../data/explore.gpx");
-    await loadGeoJson(map, points);
+    await playStory(map, "catamount_trail/2023-11-10");
   });
 }
 
 init();
 
-
-
+async function playStory(map: Map, story: string) {
+  const filePath = `../data/story/${story}.gpx`;
+  console.log({ story, filePath })
+  const points = await loadGpxFile(filePath);
+  console.log({ points, })
+  return loadGeoJson(map, points);
+}

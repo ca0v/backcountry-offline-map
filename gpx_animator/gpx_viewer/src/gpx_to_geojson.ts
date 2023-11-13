@@ -20,6 +20,10 @@ export function gpx_to_geojson(gpxContent: string) {
         },
     };
 
+    if (!Array.isArray(geoJsonContent.trk)) {
+        geoJsonContent.trk = [geoJsonContent.trk];
+    }
+
     geoJsonContent.trk.forEach((trk) => {
         trk.trkseg.trkpt.forEach((trkpt) => {
             const feature = {} as any;

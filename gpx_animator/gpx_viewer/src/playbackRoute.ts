@@ -1,9 +1,18 @@
 import { Map, Marker } from "@maptiler/sdk";
 import { GeoJson, Geometry } from "./geojson";
-import { sleep } from "./sleep";
+import { animationDelay, sleep } from "./sleep";
 
 export async function playbackRoute(map: Map, points: GeoJson) {
     const pointFeaturesQueue = [] as Marker[];
+
+    if (!points?.features?.length) throw new Error("No points found");
+
+    // put a green marker at the start of the route
+    new Marker({
+        color: "green",
+    })
+        .setLngLat((points.features[0].geometry as Geometry).coordinates as any)
+        .addTo(map);
 
     for (let i = 0; i < points.features.length; i++) {
         const feature = points.features[i];
@@ -21,12 +30,13 @@ export async function playbackRoute(map: Map, points: GeoJson) {
             marker?.remove();
         }
 
-        await sleep(100);
+        await animationDelay(5);
     }
 
-    while (pointFeaturesQueue.length > 0) {
+    while (pointFeaturesQueue.length > 1) {
         const marker = pointFeaturesQueue.shift();
         marker?.remove();
-        await sleep(250);
+        await animationDelay(25);
     }
+
 }
