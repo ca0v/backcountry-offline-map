@@ -1,6 +1,6 @@
 import { Map, Marker } from "@maptiler/sdk";
 import { GeoJson, Geometry } from "./geojson";
-import { animationDelay, sleep } from "./sleep";
+import { animationDelay } from "./sleep";
 
 export async function playbackRoute(map: Map, points: GeoJson) {
     const pointFeaturesQueue = [] as Marker[];

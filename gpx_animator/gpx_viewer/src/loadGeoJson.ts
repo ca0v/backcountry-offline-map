@@ -1,7 +1,5 @@
 import { Map } from "@maptiler/sdk";
 import { GeoJson } from "./geojson";
-import { playbackRoute } from "./playbackRoute";
-import { sleep } from "./sleep";
 import { computeExtent } from "./computeExtent";
 
 export async function loadGeoJson(map: Map, points: GeoJson) {
