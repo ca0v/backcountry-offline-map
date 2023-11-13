@@ -66,7 +66,6 @@ function setupRequestToImportFileHandler(map: Map) {
 
 export async function run() {
   const container = document.getElementById("app");
-
   if (!container) throw new Error('There is no div with the id: "map" ');
 
   let apiKey = readLocalStorage("maptiler_api_key");
@@ -78,15 +77,21 @@ export async function run() {
 
   config.apiKey = apiKey;
 
+  // read the story from the URL
+  const url = new URL(window.location.href);
+  const story = url.searchParams.get("story");
+  if (story) {
+    document.querySelector(".player_buttons")?.remove();
+  } else {
+    return;
+  }
+
+
   // map without the zoom in/out buttons
   const map = new Map({ container, attributionControl: false, geolocateControl: false, navigationControl: false });
 
   map.on("load", async () => {
     setupRequestToImportFileHandler(map);
-
-    // read the story from the URL
-    const url = new URL(window.location.href);
-    const story = url.searchParams.get("story") ?? "catamount_trail/2023-11-10";
     await playStory(map, story);
   });
 }

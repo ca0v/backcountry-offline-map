@@ -13,11 +13,18 @@
 
 <body>
   <div class="player_buttons">
-    <a class="player_button" href="/src/player.html?story=catamount_trail/2023-11-11"
+    <a class="player_button" href="index.html?story=catamount_trail/2023-11-11"
       title="Find the trail going the other direction">Nov 11</a>
-    <a class="player_button" href="/src/player.html?story=catamount_trail/2023-11-10"
+    <a class="player_button" href="index.html?story=catamount_trail/2023-11-10"
       title="Follow the trail from the Campground">Nov 10</a>
   </div>
+  <div id="app">
+  </div>
+  <script type="module">
+    import { run } from "/src/main.ts";
+    run();
+  </script>
+
 </body>
 
 </html>
