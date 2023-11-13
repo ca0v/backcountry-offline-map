@@ -5,6 +5,8 @@ import { loadGpxFile } from "./loadGpxFile";
 import { gpx_to_geojson } from "./gpx_to_geojson";
 import { readLocalStorage, writeLocalStorage } from "./readLocalStorage";
 import { loadGeoJson } from "./loadGeoJson";
+import { sleep } from "./sleep";
+import { playbackRoute } from "./playbackRoute";
 
 // if user presses "I", create an drag-and-drop zone that allows user to drop a file
 // if user drops a file, read the file and display it on the map
@@ -62,7 +64,7 @@ function setupRequestToImportFileHandler(map: Map) {
   };
 }
 
-async function init() {
+export async function run() {
   const container = document.getElementById("app");
 
   if (!container) throw new Error('There is no div with the id: "map" ');
@@ -81,16 +83,23 @@ async function init() {
 
   map.on("load", async () => {
     setupRequestToImportFileHandler(map);
-    await playStory(map, "catamount_trail/2023-11-10");
+
+    // read the story from the URL
+    const url = new URL(window.location.href);
+    const story = url.searchParams.get("story") ?? "catamount_trail/2023-11-10";
+    await playStory(map, story);
   });
 }
-
-init();
 
 async function playStory(map: Map, story: string) {
   const filePath = `../data/story/${story}.gpx`;
   console.log({ story, filePath })
   const points = await loadGpxFile(filePath);
   console.log({ points, })
-  return loadGeoJson(map, points);
+  const geoJsonPoints = await loadGeoJson(map, points);
+  await sleep(5000);
+  await playbackRoute(map, geoJsonPoints);
+  await sleep(5000);
+  // navigate back
+  window.history.back();
 }

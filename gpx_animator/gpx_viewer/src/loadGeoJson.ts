@@ -33,7 +33,5 @@ export async function loadGeoJson(map: Map, points: GeoJson) {
             padding: 20,
         });
     }
-
-    await sleep(5000);
-    await playbackRoute(map, points);
+    return points;
 }
