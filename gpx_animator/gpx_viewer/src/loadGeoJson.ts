@@ -18,8 +18,8 @@ export async function loadGeoJson(map: Map, points: GeoJson) {
         source: "track_points",
         paint: {
             "circle-radius": 3,
-            "circle-color": "white",
-            "circle-stroke-color": "black",
+            "circle-color": "black",
+            "circle-stroke-color": "white",
             "circle-stroke-width": 1,
         },
     });
