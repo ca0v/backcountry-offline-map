@@ -65,10 +65,17 @@ function setupRequestToImportFileHandler(map: Map) {
 }
 
 export async function run() {
+  // read the story from the URL
+  const url = new URL(window.location.href);
+
   const container = document.getElementById("app");
   if (!container) throw new Error('There is no div with the id: "map" ');
 
-  let apiKey = readLocalStorage("maptiler_api_key");
+  let apiKey = url.searchParams.get("api_key");
+  if (apiKey) {
+    writeLocalStorage("maptiler_api_key", apiKey);
+  }
+  apiKey = apiKey || readLocalStorage("maptiler_api_key");
   if (!apiKey) {
     apiKey = prompt("Please enter your MapTiler API key");
     if (!apiKey) throw new Error("No API key provided");
@@ -77,8 +84,6 @@ export async function run() {
 
   config.apiKey = apiKey;
 
-  // read the story from the URL
-  const url = new URL(window.location.href);
   const story = url.searchParams.get("story");
   if (story) {
     document.querySelector(".player_buttons")?.remove();
