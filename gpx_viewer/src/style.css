@@ -51,3 +51,11 @@ body {
 .player_button > div {
   padding: var(--padding);
 }
+
+/* mobile sized screens */
+@media (max-width: 600px) {
+  .player_button {
+    min-width: 80vw;
+    max-width: 80vw;
+  }
+}
