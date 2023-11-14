@@ -41,12 +41,9 @@
     }
     const target = document.querySelector(".player_buttons");
     for (let file in files) {
-      const button = document.createElement("a");
-      button.classList.add("player_button");
-      button.href = `index.html?story=${file}`;
-      button.title = files[file].about;
-      button.innerText = files[file].title;
-      target.appendChild(button);
+      const button = `<a href="index.html?story=${file}" title="${files[file].about}">${files[file].title}</a>`;
+      const label = `<div>${files[file].about}</div>`;
+      target.insertAdjacentHTML("beforeend", `<div class="player_button">${button}${label}</div>`);
     };
     import { run } from "/src/main.ts";
     run();

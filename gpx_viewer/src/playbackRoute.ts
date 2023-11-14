@@ -21,11 +21,12 @@ export async function playbackRoute(map: Map, points: GeoJson) {
 
         const marker = new Marker({
             color: "red",
+            scale: 0.5,
         }).setLngLat([lng, lat]);
         marker.addTo(map);
 
         pointFeaturesQueue.push(marker);
-        if (pointFeaturesQueue.length > 3) {
+        if (pointFeaturesQueue.length > 2) {
             const marker = pointFeaturesQueue.shift();
             marker?.remove();
         }

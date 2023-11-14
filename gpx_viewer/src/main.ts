@@ -113,9 +113,20 @@ async function playStory(map: Map, story: string) {
   const points = await loadGpxFile(filePath);
   console.log({ points, })
   const geoJsonPoints = await loadGeoJson(map, points);
+
+  let goBack = true;
+  map.on("move", () => {
+    goBack = false;
+  });
+
   await sleep(5000);
   await playbackRoute(map, geoJsonPoints);
-  await sleep(5000);
+
+  // if user pans on the map, restart the clock
+  while (!goBack) {
+    goBack = true;
+    await sleep(5000);
+  }
   // navigate back
   window.history.back();
 }

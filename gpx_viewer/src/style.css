@@ -2,6 +2,9 @@ html,
 body {
   margin: 0;
   background-color: black;
+  --title-bgc: #f0f0f0;
+  --border-radius: 0.25rem;
+  --padding: 1rem;
 }
 
 #app {
@@ -30,6 +33,21 @@ body {
   padding: 1rem;
   background-color: black;
   color: white;
-  border: 1px solid white;
-  border-radius: 1rem;
+  min-width: 20vw;
+  min-height: 20vh;
+  text-align: center;
+}
+
+.player_button > a {
+  display: block;
+  width: 100%;
+  background-color: var(--title-bgc);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  height: 3rem;
+  line-height: 3rem;
+}
+
+.player_button > div {
+  padding: var(--padding);
 }
