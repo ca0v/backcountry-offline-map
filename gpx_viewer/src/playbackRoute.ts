@@ -1,5 +1,5 @@
 import { Map, Marker } from "@maptiler/sdk";
-import { GeoJson, Geometry } from "./geojson";
+import { Feature, GeoJson, Geometry } from "./geojson";
 import { animationDelay } from "./sleep";
 
 export async function playbackRoute(map: Map, points: GeoJson) {
@@ -17,7 +17,7 @@ export async function playbackRoute(map: Map, points: GeoJson) {
 
     const corey = new Marker({
         color: "red",
-        scale: 0.5,
+        scale: 1,
     }).setLngLat(start)
         .addTo(map);
 
@@ -28,26 +28,49 @@ export async function playbackRoute(map: Map, points: GeoJson) {
         .addTo(map);
 
 
-    const followCorey = () => {
-        // place tony where this marker was
-        const coreyLngLat = corey.getLngLat().toArray();
-        const tonyLngLat = tony.getLngLat().toArray();
-        const randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.003);
-        // between corey and tony with some random offset
-        const tonyTargetLngLat = [0, 1].map(i => coreyLngLat[i] + randomLngLat[i]);
-        const tonyNextPosition = [0, 1].map(i => 0.95 * tonyLngLat[i] + 0.05 * tonyTargetLngLat[i]);
-        tony.setLngLat(tonyNextPosition as [number, number]);
-        requestAnimationFrame(followCorey);
+    {
+        let timeToNextCourseChange = Date.now() + 1000 * Math.random();
+        let randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.001);
+        let tonyTargetLngLat = tony.getLngLat().toArray().map((v, i) => v + randomLngLat[i]);
+        const followCorey = () => {
+            // place tony where this marker was
+            const coreyLngLat = corey.getLngLat().toArray();
+            const tonyLngLat = tony.getLngLat().toArray();
+            // between corey and tony with some random offset
+            if (Date.now() > timeToNextCourseChange) {
+                randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.0003);
+                tonyTargetLngLat = [0, 1].map(i => coreyLngLat[i] + randomLngLat[i]);
+                timeToNextCourseChange = Date.now() + 300 * Math.random();
+            }
+            const tonyNextPosition = [0, 1].map(i => 0.95 * tonyLngLat[i] + 0.05 * tonyTargetLngLat[i]);
+            tony.setLngLat(tonyNextPosition as [number, number]);
+            requestAnimationFrame(followCorey);
+        }
+        followCorey();
     }
-    followCorey();
 
-    for (let i = 0; i < points.features.length; i++) {
-        const feature = points.features[i];
-        const geometry = feature.geometry as Geometry;
-        const [lng, lat] = geometry.coordinates;
-        corey.setLngLat([lng, lat]);
+    return new Promise<void>((resolve, reject) => {
+        let currentTick = 0;
+        const totalPoints = points.features.length;
+        const totalTicks = 1000;
+        const interpolate = (a: number, b: number, t: number) => a + (b - a) * t;
+        const getLocation = (feature: Feature) => {
+            const geometry = feature.geometry as Geometry;
+            const [lng, lat] = geometry.coordinates;
+            return [lng, lat];
+        }
 
-        await animationDelay(5);
-    }
-
+        const moveCorey = () => {
+            currentTick++;
+            const idealIndex = currentTick / totalTicks * totalPoints;
+            const pointIndex = Math.floor(idealIndex);
+            if (pointIndex + 1 >= totalPoints) return resolve();
+            const currentPoint = getLocation(points.features[pointIndex]);
+            const nextPoint = getLocation(points.features[pointIndex + 1]);
+            const coreyNextPosition = [0, 1].map(i => interpolate(currentPoint[i], nextPoint[i], (idealIndex - pointIndex)));
+            corey.setLngLat(coreyNextPosition as [number, number]);
+            requestAnimationFrame(moveCorey);
+        }
+        moveCorey();
+    });
 }
