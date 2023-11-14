@@ -119,7 +119,7 @@ async function playStory(map: Map, story: string) {
     goBack = false;
   });
 
-  await sleep(3000);
+  await sleep(5000);
   await playbackRoute(map, geoJsonPoints);
 
   // if user pans on the map, restart the clock

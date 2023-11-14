@@ -33,21 +33,6 @@ export async function playbackRoute(map: Map, points: GeoJson) {
         'data': leash
     });
 
-    map.addLayer({
-        'id': 'line-animation',
-        'type': 'line',
-        'source': 'line',
-        'layout': {
-            'line-cap': 'round',
-            'line-join': 'round'
-        },
-        'paint': {
-            'line-color': 'orange',
-            'line-width': 5,
-            'line-opacity': 0.8
-        }
-    });
-
     const corey = new Marker({
         color: "red",
         scale: 0.8,
@@ -61,29 +46,25 @@ export async function playbackRoute(map: Map, points: GeoJson) {
     }).setLngLat(start)
         .addTo(map);
 
-    {
-        let timeToNextCourseChange = Date.now() + 100 * Math.random();
-        let randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.001);
-        let tonyTargetLngLat = tony.getLngLat().toArray().map((v, i) => v + randomLngLat[i]);
-        const followCorey = () => {
-            // place tony where this marker was
-            const coreyLngLat = corey.getLngLat().toArray();
-            const tonyLngLat = tony.getLngLat().toArray();
-            // between corey and tony with some random offset
-            if (Date.now() > timeToNextCourseChange) {
-                randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.0003);
-                tonyTargetLngLat = [0, 1].map(i => coreyLngLat[i] + randomLngLat[i]);
-                timeToNextCourseChange = Date.now() + 300 * Math.random();
-            }
-            const tonyNextPosition = [0, 1].map(i => 0.9 * tonyLngLat[i] + 0.1 * tonyTargetLngLat[i]);
-            tony.setLngLat(tonyNextPosition as [number, number]);
-            requestAnimationFrame(followCorey);
+    map.addLayer({
+        'id': 'line-animation',
+        'type': 'line',
+        'source': 'line',
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': 'orange',
+            'line-width': 3,
+            'line-opacity': 1
         }
-        followCorey();
-    }
+    });
+
 
     return new Promise<void>((resolve) => {
         let currentTick = 0;
+        let stop = false;
         const totalPoints = points.features.length;
         const totalTicks = 1000;
         const interpolate = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -93,11 +74,36 @@ export async function playbackRoute(map: Map, points: GeoJson) {
             return [lng, lat];
         }
 
+        {
+            let timeToNextCourseChange = Date.now() + 100 * Math.random();
+            let randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.005);
+            let tonyTargetLngLat = tony.getLngLat().toArray().map((v, i) => v + randomLngLat[i]);
+            const followCorey = () => {
+                if (stop) return;
+                // place tony where this marker was
+                const coreyLngLat = corey.getLngLat().toArray();
+                const tonyLngLat = tony.getLngLat().toArray();
+                // between corey and tony with some random offset
+                if (Date.now() > timeToNextCourseChange) {
+                    randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.0003);
+                    tonyTargetLngLat = [0, 1].map(i => coreyLngLat[i] + randomLngLat[i]);
+                    timeToNextCourseChange = Date.now() + 300 * Math.random();
+                }
+                const tonyNextPosition = [0, 1].map(i => 0.9 * tonyLngLat[i] + 0.1 * tonyTargetLngLat[i]);
+                tony.setLngLat(tonyNextPosition as [number, number]);
+                requestAnimationFrame(followCorey);
+            }
+            followCorey();
+        }
         const moveCorey = () => {
+            if (stop) return;
             currentTick++;
             const idealIndex = currentTick / totalTicks * totalPoints;
             const pointIndex = Math.floor(idealIndex);
-            if (pointIndex + 1 >= totalPoints) return resolve();
+            if (stop || pointIndex + 1 >= totalPoints) {
+                stop = true;
+                return resolve();
+            }
             const currentPoint = getLocation(points.features[pointIndex]);
             const nextPoint = getLocation(points.features[pointIndex + 1]);
             const coreyNextPosition = [0, 1].map(i => interpolate(currentPoint[i], nextPoint[i], (idealIndex - pointIndex)));
@@ -108,6 +114,7 @@ export async function playbackRoute(map: Map, points: GeoJson) {
 
         const moveLeash = () => {
             // move line from tony to corey
+            if (stop) return;
             const tonyLngLat = tony.getLngLat().toArray();
             const coreyLngLat = corey.getLngLat().toArray();
             leash.features[0].geometry.coordinates = [tonyLngLat, coreyLngLat];
