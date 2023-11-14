@@ -1,6 +1,5 @@
 import { Map, Marker } from "@maptiler/sdk";
 import { Feature, GeoJson, Geometry } from "./geojson";
-import { animationDelay } from "./sleep";
 
 export async function playbackRoute(map: Map, points: GeoJson) {
     if (!points?.features?.length) throw new Error("No points found");
@@ -49,7 +48,7 @@ export async function playbackRoute(map: Map, points: GeoJson) {
         followCorey();
     }
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
         let currentTick = 0;
         const totalPoints = points.features.length;
         const totalTicks = 1000;
