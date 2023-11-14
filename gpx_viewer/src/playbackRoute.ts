@@ -9,7 +9,7 @@ export async function playbackRoute(map: Map, points: GeoJson) {
     // put a green marker at the start of the route
     new Marker({
         color: "green",
-        scale: 0.3,
+        scale: 0.5,
     })
         .setLngLat(start)
         .addTo(map);
@@ -22,13 +22,13 @@ export async function playbackRoute(map: Map, points: GeoJson) {
 
     const tony = new Marker({
         color: "orange",
-        scale: 0.3,
+        scale: 0.5,
     }).setLngLat(start)
         .addTo(map);
 
 
     {
-        let timeToNextCourseChange = Date.now() + 1000 * Math.random();
+        let timeToNextCourseChange = Date.now() + 100 * Math.random();
         let randomLngLat = [1, 1].map(i => i * (Math.random() - 0.5) * 0.001);
         let tonyTargetLngLat = tony.getLngLat().toArray().map((v, i) => v + randomLngLat[i]);
         const followCorey = () => {
@@ -41,7 +41,7 @@ export async function playbackRoute(map: Map, points: GeoJson) {
                 tonyTargetLngLat = [0, 1].map(i => coreyLngLat[i] + randomLngLat[i]);
                 timeToNextCourseChange = Date.now() + 300 * Math.random();
             }
-            const tonyNextPosition = [0, 1].map(i => 0.95 * tonyLngLat[i] + 0.05 * tonyTargetLngLat[i]);
+            const tonyNextPosition = [0, 1].map(i => 0.9 * tonyLngLat[i] + 0.1 * tonyTargetLngLat[i]);
             tony.setLngLat(tonyNextPosition as [number, number]);
             requestAnimationFrame(followCorey);
         }
