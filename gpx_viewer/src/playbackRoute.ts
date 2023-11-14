@@ -50,7 +50,7 @@ export async function playbackRoute(map: Map, points: GeoJson) {
 
     const corey = new Marker({
         color: "red",
-        scale: 1,
+        scale: 0.8,
     }).setLngLat(start)
         .addTo(map);
 

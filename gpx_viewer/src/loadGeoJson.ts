@@ -28,7 +28,8 @@ export async function loadGeoJson(map: Map, points: GeoJson) {
         console.log("extent", extent);
         // set the map view to the extent of the track points
         map.fitBounds(extent as any, {
-            padding: 20,
+            padding: 50,
+            duration: 4000,
         });
     }
     return points;
