@@ -14,6 +14,40 @@ export async function playbackRoute(map: Map, points: GeoJson) {
         .setLngLat(start)
         .addTo(map);
 
+    // draw a line between corey and tony
+    const leash = {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [[0, 0]]
+                }
+            }
+        ]
+    };
+
+    map.addSource('line', {
+        'type': 'geojson',
+        'data': leash
+    });
+
+    map.addLayer({
+        'id': 'line-animation',
+        'type': 'line',
+        'source': 'line',
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': 'orange',
+            'line-width': 5,
+            'line-opacity': 0.8
+        }
+    });
+
     const corey = new Marker({
         color: "red",
         scale: 1,
@@ -21,11 +55,11 @@ export async function playbackRoute(map: Map, points: GeoJson) {
         .addTo(map);
 
     const tony = new Marker({
-        color: "orange",
+        color: "#ccc",
         scale: 0.5,
+        offset: [0, -3],
     }).setLngLat(start)
         .addTo(map);
-
 
     {
         let timeToNextCourseChange = Date.now() + 100 * Math.random();
@@ -71,5 +105,16 @@ export async function playbackRoute(map: Map, points: GeoJson) {
             requestAnimationFrame(moveCorey);
         }
         moveCorey();
+
+        const moveLeash = () => {
+            // move line from tony to corey
+            const tonyLngLat = tony.getLngLat().toArray();
+            const coreyLngLat = corey.getLngLat().toArray();
+            leash.features[0].geometry.coordinates = [tonyLngLat, coreyLngLat];
+            // @ts-ignore
+            map.getSource('line').setData(leash);
+            requestAnimationFrame(moveLeash);
+        }
+        moveLeash();
     });
 }
