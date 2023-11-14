@@ -93,7 +93,13 @@ export async function run() {
 
 
   // map without the zoom in/out buttons
-  const map = new Map({ container, attributionControl: false, geolocateControl: false, navigationControl: false });
+  const map = new Map({
+    container,
+    style: "topo-v2",
+    attributionControl: false,
+    geolocateControl: false,
+    navigationControl: false
+  });
 
   map.on("load", async () => {
     setupRequestToImportFileHandler(map);
